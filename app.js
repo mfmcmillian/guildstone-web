@@ -16,7 +16,9 @@ const el = (tag, attrs = {}, ...children) => {
 const TIER_LABEL = { T0: 'Base', T1: 'Tier 1', T2: 'Tier 2', T3: 'Tier 3', T4: 'Tier 4', C2: 'Pair drop', C3: 'Pair drop', C4: 'Set drop', C5: 'Apex drop' };
 const GROUPS = [
   { id: 'ring', title: 'The Ring', blurb: 'Free. Wear it to play.', accent: '#ffd23f' },
-  ...PROF_IDS.map((p) => ({ id: p, title: `${PROFESSIONS[p].name} suits`, blurb: `Four suits, crafted in order from L1 to L4. Each one you wear makes the next one possible.`, accent: PROFESSIONS[p].color })),
+  ...PROF_IDS.map((p) => ({ id: p, title: `${PROFESSIONS[p].name} suits`, blurb: p === 'assassin'
+    ? 'Not crafted. Buy the Ether Assassin pieces in the Decentraland Marketplace. Wearing them unlocks the Skeleton Yard the same way crafted suits unlock their zones.'
+    : 'Four suits, crafted in order from L1 to L4. Each one you wear makes the next one possible.', accent: PROFESSIONS[p].color })),
   { id: 'relic', title: 'Relics', blurb: 'One per profession, for players who finish all four suits of that profession.', accent: '#ffd23f' },
   { id: 'crown', title: 'Guildstone Crown', blurb: 'For players who own all four Relics. The last thing to craft.', accent: '#a259ff' }
 ];
@@ -52,7 +54,8 @@ function wearableCard(w) {
     w.cost.length ? el('div', { class: 'label' }, 'What it costs to craft') : null,
     w.cost.length ? el('div', { class: 'cost' }, w.relics ? el('span', { class: 'mat relic' }, el('img', { src: 'img/suit.png', alt: '' }), el('span', { class: 'n' }, 4), el('span', null, 'Relics')) : null, ...w.cost.map(([m, n]) => matChip(m, n))) : null,
     el('div', { class: 'label' }, w.cost.length ? 'Before you can craft it' : 'How you get it'),
-    el('ul', { class: 'req' }, ...w.requires.map((r) => el('li', null, r)))
+    el('ul', { class: 'req' }, ...w.requires.map((r) => el('li', null, r))),
+    w.buy ? el('a', { class: 'buy', href: w.buy, target: '_blank', rel: 'noopener' }, 'Open in Marketplace') : null
   );
   return el('article', { class: 'card', style: `--accent:${accent}` }, art, body);
 }

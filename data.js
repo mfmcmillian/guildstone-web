@@ -87,10 +87,10 @@ const SUIT_COLLECTION = 'urn:decentraland:matic:collections-v2:0xf676c2e2768f415
 const ASSASSIN_COLLECTION = 'urn:decentraland:matic:collections-v2:0x0bf152a83a6fc55066c2b664b164ca2916ad38f5';
 const SUIT_IDS = { butcher: [0, 3, 6, 9], lumberjack: [1, 4, 7, 10], miner: [2, 5, 8, 11] };
 const ASSASSIN_PIECES = [
-  [0, 'Ether Assassin Boots'],
-  [1, 'Ether Assassin Gloves'],
-  [3, 'Ether Assassin Pants'],
-  [2, 'Ether Assassin Armor']
+  [0, 'Ether Assassin Boots', 'Exotic'],
+  [1, 'Ether Assassin Gloves', 'Rare'],
+  [3, 'Ether Assassin Pants', 'Legendary'],
+  [2, 'Ether Assassin Armor', 'Epic']
 ];
 const thumb = (urn) => `https://peer.decentraland.org/lambdas/collections/contents/${urn}/thumbnail`;
 const SUIT_MULT = [1, 2, 3, 5, 8];
@@ -128,11 +128,14 @@ WEARABLES.push({
 });
 for (const p of PROF_IDS) {
   for (let level = 1; level <= 4; level++) {
-    const r = suitRecipe(p, level);
     const urn = p === 'assassin' ? `${ASSASSIN_COLLECTION}:${ASSASSIN_PIECES[level - 1][0]}` : `${SUIT_COLLECTION}:${SUIT_IDS[p][level - 1]}`;
+    // Assassin pieces are sold in the Marketplace, never crafted. Wearing them still gates the Skeleton Yard tiers.
+    const r = p === 'assassin'
+      ? { cost: [], requires: ['Buy it in the Decentraland Marketplace'], buy: `https://decentraland.org/marketplace/contracts/${ASSASSIN_COLLECTION.split(':').pop()}/items/${ASSASSIN_PIECES[level - 1][0]}` }
+      : suitRecipe(p, level);
     const name = p === 'assassin' ? ASSASSIN_PIECES[level - 1][1] : `${PROFESSIONS[p].name} L${level}`;
     WEARABLES.push({
-      id: `${p}_l${level}`, name, group: p, level, rarity: ['Uncommon', 'Rare', 'Epic', 'Legendary'][level - 1],
+      id: `${p}_l${level}`, name, group: p, level, rarity: p === 'assassin' ? ASSASSIN_PIECES[level - 1][2] : ['Uncommon', 'Rare', 'Epic', 'Legendary'][level - 1],
       collection: p === 'assassin' ? 'Ether Assassin set' : 'Antrom Profession Suits', img: thumb(urn), urn,
       effect: `Wear it to get ${SUIT_MULT[level]}× ${LADDER[p][0][1]}, carry ${SUIT_BAG[level]} more, and start finding ${LADDER[p][level][1]} in the ${PROFESSIONS[p].zone}.`,
       ...r
@@ -160,21 +163,24 @@ const USED_IN = {};
 for (const w of WEARABLES) for (const [m] of w.cost) (USED_IN[m] = USED_IN[m] || []).push(w.id);
 for (const p of PROF_IDS) LADDER[p].forEach(([rawId, , refId]) => { (USED_IN[rawId] = USED_IN[rawId] || []).push(`refine:${refId}`); });
 
-/* Pacing (one player, one profession at a time, hours of ring time per day). */
+/* Pacing (one player, one profession at a time, hours of ring time per day).
+   Three professions are crafted; Assassin pieces are bought, so they cost no ring time. */
 const CYCLES_PER_HOUR = 1200;
+const CRAFTED_PROFESSIONS = 3;
 const STEP_CYCLES = { L1: 6000, L2: 400 * 40, L3: 300 * 120, L4: 250 * 300, Relic: 200 * 800 };
 const SHARD_CYCLES = 50 * 5000;
 function milestones(hoursPerDay) {
   const d = (c) => c / CYCLES_PER_HOUR / hoursPerDay;
-  const l1 = 4 * STEP_CYCLES.L1, l2 = l1 + 4 * STEP_CYCLES.L2, l3 = l2 + 4 * STEP_CYCLES.L3;
-  const allL4 = l3 + 4 * STEP_CYCLES.L4;
+  const n = CRAFTED_PROFESSIONS;
+  const l1 = n * STEP_CYCLES.L1, l2 = l1 + n * STEP_CYCLES.L2, l3 = l2 + n * STEP_CYCLES.L3;
+  const allL4 = l3 + n * STEP_CYCLES.L4;
   return [
     ['First L1 suit', d(STEP_CYCLES.L1)],
     ['First L2 suit', d(STEP_CYCLES.L1 + STEP_CYCLES.L2)],
-    ['All four L2', d(l2)],
-    ['All four L3', d(l3)],
+    ['Every L2 suit crafted', d(l2)],
+    ['Every L3 suit crafted', d(l3)],
     ['First L4 suit', d(l3 + STEP_CYCLES.L4)],
-    ['All four L4', d(allL4)],
+    ['Every L4 suit crafted', d(allL4)],
     ['All four Relics', d(allL4 + 4 * STEP_CYCLES.Relic)],
     ['Guildstone Crown', d(allL4 + Math.max(4 * STEP_CYCLES.Relic, SHARD_CYCLES))]
   ];
