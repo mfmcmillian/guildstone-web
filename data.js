@@ -95,7 +95,7 @@ const ASSASSIN_PIECES = [
   [2, 'Ether Assassin Armor', 'Epic']
 ];
 const thumb = (urn) => `https://peer.decentraland.org/lambdas/collections/contents/${urn}/thumbnail`;
-const SUIT_MULT = [1, 2, 3, 5, 8];
+// Suits do not multiply yield. They are keys: wearing tier N unlocks the tier N+1 drop.
 const SUIT_BAG = [200, 500, 1000, 2000, 4000];
 
 function ref(p, t) { return LADDER[p][t][2]; }
@@ -141,7 +141,7 @@ for (const p of PROF_IDS) {
     WEARABLES.push({
       id: `${p}_l${level}`, name, group: p, level, rarity: p === 'assassin' ? ASSASSIN_PIECES[level - 1][2] : ['Uncommon', 'Rare', 'Epic', 'Legendary'][level - 1],
       collection: p === 'assassin' ? 'Ether Assassin set' : 'Antrom Profession Suits', img: thumb(urn), urn,
-      effect: `Wear it to get ${SUIT_MULT[level]}× ${LADDER[p][0][1]}, carry ${SUIT_BAG[level]} more, and start finding ${LADDER[p][level][1]} in the ${PROFESSIONS[p].zone}.`,
+      effect: `Wear it and ${LADDER[p][level][1]} starts dropping in the ${PROFESSIONS[p].zone}. Also carry ${SUIT_BAG[level]} more.`,
       ...r
     });
   }
