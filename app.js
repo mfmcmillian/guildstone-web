@@ -15,10 +15,10 @@ const el = (tag, attrs = {}, ...children) => {
 
 const TIER_LABEL = { T0: 'Base', T1: 'Tier 1', T2: 'Tier 2', T3: 'Tier 3', T4: 'Tier 4', C2: 'Pair drop', C3: 'Pair drop', C4: 'Set drop', C5: 'Apex drop' };
 const GROUPS = [
-  { id: 'ring', title: 'The Ring', blurb: 'Where it starts.', accent: '#ffd23f' },
-  ...PROF_IDS.map((p) => ({ id: p, title: `${PROFESSIONS[p].name} suits`, blurb: `${PROFESSIONS[p].zone} · L1 → L4`, accent: PROFESSIONS[p].color })),
-  { id: 'relic', title: 'Relics', blurb: 'One per profession. Cosmetic, mythic, and the only use for Tier 4 materials.', accent: '#ffd23f' },
-  { id: 'crown', title: 'Guildstone Crown', blurb: 'All four Relics, fifty Shards. The last craft in the game.', accent: '#a259ff' }
+  { id: 'ring', title: 'The Ring', blurb: 'Free. Wear it to play.', accent: '#ffd23f' },
+  ...PROF_IDS.map((p) => ({ id: p, title: `${PROFESSIONS[p].name} suits`, blurb: `Four suits, crafted in order from L1 to L4. Each one you wear makes the next one possible.`, accent: PROFESSIONS[p].color })),
+  { id: 'relic', title: 'Relics', blurb: 'One per profession, for players who finish all four suits of that profession.', accent: '#ffd23f' },
+  { id: 'crown', title: 'Guildstone Crown', blurb: 'For players who own all four Relics. The last thing to craft.', accent: '#a259ff' }
 ];
 
 /* ---------- Tabs ---------- */
@@ -49,9 +49,9 @@ function wearableCard(w) {
   const body = el('div', { class: 'body' },
     el('h3', null, w.name),
     el('div', { class: 'effect' }, w.effect),
-    w.cost.length ? el('div', { class: 'label' }, 'Costs') : null,
+    w.cost.length ? el('div', { class: 'label' }, 'What it costs to craft') : null,
     w.cost.length ? el('div', { class: 'cost' }, w.relics ? el('span', { class: 'mat relic' }, el('img', { src: 'img/suit.png', alt: '' }), el('span', { class: 'n' }, 4), el('span', null, 'Relics')) : null, ...w.cost.map(([m, n]) => matChip(m, n))) : null,
-    el('div', { class: 'label' }, 'Requires'),
+    el('div', { class: 'label' }, w.cost.length ? 'Before you can craft it' : 'How you get it'),
     el('ul', { class: 'req' }, ...w.requires.map((r) => el('li', null, r)))
   );
   return el('article', { class: 'card', style: `--accent:${accent}` }, art, body);
@@ -123,11 +123,11 @@ function renderMaterials() {
     const profs = materialFilter === 'all' ? PROF_IDS : [materialFilter];
     for (const p of profs) {
       const ids = LADDER[p].flatMap(([raw, , ref]) => [raw, ref]);
-      sections.push({ title: `${PROFESSIONS[p].name} · ${PROFESSIONS[p].zone}`, blurb: 'Raw drop → Workshop refined, one row per suit tier', accent: PROFESSIONS[p].color, ids });
+      sections.push({ title: `${PROFESSIONS[p].name} · ${PROFESSIONS[p].zone}`, blurb: 'Each pair is one material you collect and the refined version the Workshop makes from it. Each pair unlocks with the next suit.', accent: PROFESSIONS[p].color, ids });
     }
   }
   if (materialFilter === 'all' || materialFilter === 'combo') {
-    sections.push({ title: 'Combination drops', blurb: 'Only appear once you wear the right suits. They cross the two collections so nobody can tunnel one profession.', accent: '#ffd23f', ids: COMBOS.map((c) => c.id) });
+    sections.push({ title: 'Combination drops', blurb: 'These only drop while you wear suits from more than one profession at the same time.', accent: '#ffd23f', ids: COMBOS.map((c) => c.id) });
   }
   for (const s of sections) {
     root.append(el('section', { class: 'group', style: `--accent:${s.accent}` },
@@ -148,32 +148,35 @@ function openMaterial(id) {
   const m = MATERIALS[id];
   const used = USED_IN[id] || [];
   const kv = [];
-  kv.push(['Type', `${TIER_LABEL[m.tier]} · ${m.kind}`]);
-  if (m.kind === 'refined') kv.push(['Made from', `5 × ${MATERIALS[m.from].name} at the Workshop`]);
-  else if (m.kind === 'currency') kv.push(['How to get', m.gate]);
-  else {
-    kv.push(['Where', m.zones.map((z) => PROFESSIONS[z].zone).join(', ')]);
-    kv.push(['You need', m.gate]);
+  const zones = m.zones ? m.zones.map((z) => PROFESSIONS[z].zone).join(' or ') : '';
+  const perHour = m.rate ? (3600 / 3 / m.rate).toFixed(m.rate > 1000 ? 2 : 1) : null;
+  if (m.kind === 'refined') {
+    kv.push(['How you get it', `Take 5 ${MATERIALS[m.from].name} to the Workshop and turn them into 1 ${m.name}.`]);
+  } else if (m.kind === 'currency') {
+    kv.push(['How you get it', 'Sell base materials at the Depot.']);
+  } else {
+    kv.push(['Where it drops', `While working at the ${zones}.`]);
+    kv.push(['What you must wear', m.gate === 'No suit needed' ? 'Nothing special. Everyone gets this from the start.' : m.gate.replace(/^Wear /, '') + '.']);
+    kv.push(['How often', m.rate ? `About 1 every ${m.rate.toLocaleString()} work cycles, roughly ${perHour} an hour.` : 'Every work cycle (3 seconds). Suits, tools and your guild multiply it.']);
   }
-  if (m.rate) kv.push(['Drop rate', `1 in ${m.rate.toLocaleString()} cycles  (~${(3600 / 3 / m.rate).toFixed(m.rate > 1000 ? 2 : 1)} per hour)`]);
-  else if (m.kind === 'raw') kv.push(['Drop rate', 'Every 3 s cycle, multiplied by your suit, tools and guild']);
-  kv.push(['Sellable', m.sellable ? 'Yes — Depot' : 'No — craft only']);
+  kv.push(['Can you sell it?', m.sellable ? 'Yes, at the Depot for coins.' : 'No. It is only for crafting.']);
 
   detail.replaceChildren(
     el('button', { class: 'close', onclick: closeDetail, 'aria-label': 'Close' }, '×'),
     el('img', { class: 'hero', src: m.img, alt: m.name }),
     el('h2', null, m.name),
+    el('div', { class: 'tier-line' }, TIER_LABEL[m.tier]),
     el('dl', { class: 'kv' }, ...kv.flatMap(([k, v]) => [el('dt', null, k), el('dd', null, v)])),
-    used.length ? el('div', { class: 'label' }, 'Used for') : null,
+    used.length ? el('div', { class: 'label' }, 'What it is used for') : null,
     used.length ? el('div', { class: 'list' }, ...used.map((u) => {
       if (u.startsWith('refine:')) {
         const r = MATERIALS[u.slice(7)];
-        return el('button', { onclick: () => openMaterial(r.id) }, el('img', { src: r.img, alt: '' }), el('span', null, r.name, el('small', null, 'Workshop refine, 5 → 1')));
+        return el('button', { onclick: () => openMaterial(r.id) }, el('img', { src: r.img, alt: '' }), el('span', null, r.name, el('small', null, `5 ${m.name} make 1 ${r.name} at the Workshop`)));
       }
       const w = WEARABLES.find((x) => x.id === u);
       const amt = w.cost.find(([mm]) => mm === id)[1];
       return el('button', { onclick: () => { closeDetail(); wearableFilter = w.group; renderWearableFilters(); renderWearables(); $('#tabs button[data-tab=wearables]').click(); } },
-        el('img', { src: w.img, alt: '' }), el('span', null, w.name, el('small', null, `${amt} needed`)));
+        el('img', { src: w.img, alt: '' }), el('span', null, w.name, el('small', null, `Crafting it costs ${amt} ${m.name}`)));
     })) : null
   );
   detail.classList.remove('hidden');

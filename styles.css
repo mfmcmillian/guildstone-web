@@ -122,10 +122,11 @@ main { max-width: 1280px; margin: 0 auto; padding: 24px 28px 80px; }
 }
 .detail .close { position: absolute; top: 14px; right: 14px; border: 0; background: var(--panel); border-radius: 999px; width: 36px; height: 36px; font-size: 18px; }
 .detail img.hero { width: 100%; aspect-ratio: 1; object-fit: contain; border-radius: 14px; background: #1a1724; }
-.detail h2 { font-size: 22px; color: var(--gold); }
-.detail .kv { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; font-size: 14px; }
-.detail .kv dt { color: var(--muted); }
-.detail .kv dd { margin: 0; }
+.detail h2 { font-size: 22px; color: var(--gold); margin-bottom: -10px; }
+.detail .tier-line { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.detail .kv { display: grid; grid-template-columns: 1fr; gap: 12px; font-size: 15px; line-height: 1.45; }
+.detail .kv dt { color: var(--muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2px; }
+.detail .kv dd { margin: 0 0 4px; }
 .detail .list { display: flex; flex-direction: column; gap: 6px; }
 .detail .list button { text-align: left; display: flex; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
 .detail .list img { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; }

@@ -131,11 +131,10 @@ for (const p of PROF_IDS) {
     const r = suitRecipe(p, level);
     const urn = p === 'assassin' ? `${ASSASSIN_COLLECTION}:${ASSASSIN_PIECES[level - 1][0]}` : `${SUIT_COLLECTION}:${SUIT_IDS[p][level - 1]}`;
     const name = p === 'assassin' ? ASSASSIN_PIECES[level - 1][1] : `${PROFESSIONS[p].name} L${level}`;
-    const unlocks = level < 4 ? `Unlocks ${LADDER[p][level][1]} drops in the ${PROFESSIONS[p].zone}` : `Unlocks ${LADDER[p][4][1]} drops in the ${PROFESSIONS[p].zone}`;
     WEARABLES.push({
       id: `${p}_l${level}`, name, group: p, level, rarity: ['Uncommon', 'Rare', 'Epic', 'Legendary'][level - 1],
       collection: p === 'assassin' ? 'Ether Assassin set' : 'Antrom Profession Suits', img: thumb(urn), urn,
-      effect: `×${SUIT_MULT[level]} ${LADDER[p][0][1]} per cycle • +${SUIT_BAG[level]} backpack • ${unlocks}`,
+      effect: `Wear it to get ${SUIT_MULT[level]}× ${LADDER[p][0][1]}, carry ${SUIT_BAG[level]} more, and start finding ${LADDER[p][level][1]} in the ${PROFESSIONS[p].zone}.`,
       ...r
     });
   }
@@ -144,14 +143,14 @@ for (const p of PROF_IDS) {
   const relic = RELICS[p];
   WEARABLES.push({
     id: relic.id, name: relic.name, group: 'relic', profession: p, rarity: 'Mythic', collection: 'Antrom Relics (new)', slot: relic.slot,
-    img: `img/item_${relic.id}.jpg`, effect: `Cosmetic ${relic.slot.toLowerCase()} piece. Stacks on top of any suit. Proof you finished the ${PROFESSIONS[p].name} road.`,
+    img: `img/item_${relic.id}.jpg`, effect: `A ${relic.slot.toLowerCase()} piece you wear on top of your suit. It does not change your drops. It shows everyone you finished the ${PROFESSIONS[p].name} road.`,
     cost: [[ref(p, 4), 40], ['antrom_essence', 80], [COMBO_L3[p], 40]],
     requires: [`Own ${PROFESSIONS[p].name} L4`, `${PROFESSIONS[p].name} Lv 50`], drives: 'Keep gathering after L4'
   });
 }
 WEARABLES.push({
   id: 'guildstone_crown', name: 'Guildstone Crown', group: 'crown', rarity: 'Unique', collection: 'Antrom Relics (new)', slot: 'Head',
-  img: 'img/item_guildstone_crown.jpg', effect: 'The end of the road. Tiny supply; the leaderboard shows who holds one.',
+  img: 'img/item_guildstone_crown.jpg', effect: 'The last thing in the game to craft. Very few will ever exist, and the leaderboard shows who has one.',
   cost: [['guildstone_shard', 50], ['antrom_essence', 150]], relics: true,
   requires: ['Own all four Relics', 'All four professions at L4'], drives: 'The last thing anyone crafts'
 });
