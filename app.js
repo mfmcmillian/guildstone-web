@@ -163,6 +163,7 @@ function openMaterial(id) {
     kv.push(['How often', m.rate ? `About 1 every ${m.rate.toLocaleString()} work cycles, roughly ${perHour} an hour.` : 'Every work cycle (3 seconds). Suits, tools and your guild multiply it.']);
   }
   kv.push(['Can you sell it?', m.sellable ? 'Yes, at the Depot for coins.' : 'No. It is only for crafting.']);
+  if (m.note) kv.push(['Good to know', m.note]);
 
   detail.replaceChildren(...[
     el('button', { class: 'close', onclick: closeDetail, 'aria-label': 'Close' }, '×'),

@@ -80,6 +80,8 @@ for (const c of COMBOS) {
     : 'Wear ' + parts.map(([p, l]) => `${PROFESSIONS[p].name} L${l}+`).join(' and ');
   MATERIALS[c.id] = { id: c.id, name: c.name, kind: 'combo', tier: c.tier, zones: c.zones, gate: needs, rate: c.rate, img: `img/res_${c.id}.jpg`, sellable: false };
 }
+// Loyalty treat: Beast Pelts earned in Antrom (Wild Lands bears and bounties) are credited here too.
+MATERIALS.hide.note = 'Played Antrom? Any Beast Pelts you earned in the Wild Lands are given to you here as well. You keep them in Antrom too.';
 MATERIALS.coin = { id: 'coin', name: 'Coins', kind: 'currency', tier: 'T0', gate: 'Sell base materials at the Depot. Wood and Rock sell for 2, Meat and Bone for 3, and the refined versions for 30 to 40 each, so refine before you sell.', img: 'img/coin.png', sellable: false };
 
 /* Existing suit wearables (Polygon collections). Thumbnails come from the catalyst. */
