@@ -36,7 +36,7 @@ function matChip(id, amount) {
   const m = MATERIALS[id];
   return el('button', { class: `mat ${m.kind}`, title: m.gate, onclick: () => openMaterial(id) },
     el('img', { src: m.img, alt: '' }),
-    amount !== undefined ? el('span', { class: 'n' }, amount) : null,
+    amount !== undefined ? el('span', { class: 'n' }, amount.toLocaleString()) : null,
     el('span', null, m.name)
   );
 }
@@ -156,7 +156,7 @@ function openMaterial(id) {
   if (m.kind === 'refined') {
     kv.push(['How you get it', `Take 5 ${MATERIALS[m.from].name} to the Workshop and turn them into 1 ${m.name}.`]);
   } else if (m.kind === 'currency') {
-    kv.push(['How you get it', 'Sell base materials at the Depot.']);
+    kv.push(['How you get it', m.gate]);
   } else {
     kv.push(['Where it drops', `While working at the ${zones}.`]);
     kv.push(['What you must wear', m.gate === 'No suit needed' ? 'Nothing special. Everyone gets this from the start.' : m.gate.replace(/^Wear /, '') + '.']);
@@ -164,7 +164,7 @@ function openMaterial(id) {
   }
   kv.push(['Can you sell it?', m.sellable ? 'Yes, at the Depot for coins.' : 'No. It is only for crafting.']);
 
-  detail.replaceChildren(
+  detail.replaceChildren(...[
     el('button', { class: 'close', onclick: closeDetail, 'aria-label': 'Close' }, '×'),
     el('img', { class: 'hero', src: m.img, alt: m.name }),
     el('h2', null, m.name),
@@ -181,7 +181,7 @@ function openMaterial(id) {
       return el('button', { onclick: () => { closeDetail(); wearableFilter = w.group; renderWearableFilters(); renderWearables(); $('#tabs button[data-tab=wearables]').click(); } },
         el('img', { src: w.img, alt: '' }), el('span', null, w.name, el('small', null, `Crafting it costs ${amt} ${m.name}`)));
     })) : null
-  );
+  ].filter(Boolean));
   detail.classList.remove('hidden');
   scrim.classList.remove('hidden');
 }

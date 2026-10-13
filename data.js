@@ -80,7 +80,7 @@ for (const c of COMBOS) {
     : 'Wear ' + parts.map(([p, l]) => `${PROFESSIONS[p].name} L${l}+`).join(' and ');
   MATERIALS[c.id] = { id: c.id, name: c.name, kind: 'combo', tier: c.tier, zones: c.zones, gate: needs, rate: c.rate, img: `img/res_${c.id}.jpg`, sellable: false };
 }
-MATERIALS.coin = { id: 'coin', name: 'Coins', kind: 'currency', tier: 'T0', gate: 'Sell base materials at the Depot', img: 'img/coin.png', sellable: false };
+MATERIALS.coin = { id: 'coin', name: 'Coins', kind: 'currency', tier: 'T0', gate: 'Sell base materials at the Depot. Wood and Rock sell for 2, Meat and Bone for 3, and the refined versions for 30 to 40 each, so refine before you sell.', img: 'img/coin.png', sellable: false };
 
 /* Existing suit wearables (Polygon collections). Thumbnails come from the catalyst. */
 const SUIT_COLLECTION = 'urn:decentraland:matic:collections-v2:0xf676c2e2768f415a10fa1703a5100141084f63b5';
@@ -102,14 +102,16 @@ function ref(p, t) { return LADDER[p][t][2]; }
 function suitRecipe(p, level) {
   const others = PROF_IDS.filter((o) => o !== p);
   switch (level) {
+    // Skeleton Yard materials are spread across every tier so the Assassin pieces (bought) matter to all
+    // three crafted professions. Coins scale steeply because refined materials sell for 30 each.
     case 1:
-      return { cost: [[ref(p, 0), 300], ...others.map((o) => [ref(o, 0), 100]), ['coin', 500]], requires: [`${PROFESSIONS[p].name} Lv 10`], drives: 'Visit all four zones once' };
+      return { cost: [[ref(p, 0), 300], ...others.map((o) => [ref(o, 0), 100]), ['coin', 2000]], requires: [`${PROFESSIONS[p].name} Lv 10`], drives: 'Visit all four zones once' };
     case 2:
-      return { cost: [[ref(p, 1), 80], [ref(p, 0), 600]], requires: [`Own ${PROFESSIONS[p].name} L1`, `${PROFESSIONS[p].name} Lv 20`], drives: 'Commit to a zone' };
+      return { cost: [[ref(p, 1), 80], [ref('assassin', 1), 30], [ref(p, 0), 600], ['coin', 20000]], requires: [`Own ${PROFESSIONS[p].name} L1`, `${PROFESSIONS[p].name} Lv 20`], drives: 'Commit to a zone' };
     case 3:
-      return { cost: [[ref(p, 2), 60], [COMBO_L2[p], 100], [ref(p, 1), 40]], requires: [`Own ${PROFESSIONS[p].name} L2`, `${PROFESSIONS[p].name} Lv 30`], drives: 'Level a second profession' };
+      return { cost: [[ref(p, 2), 60], [COMBO_L2[p], 100], [ref('assassin', 2), 25], [ref(p, 1), 40], ['coin', 60000]], requires: [`Own ${PROFESSIONS[p].name} L2`, `${PROFESSIONS[p].name} Lv 30`], drives: 'Level a second profession' };
     case 4:
-      return { cost: [[ref(p, 3), 50], ['antrom_essence', 60], [COMBO_L3[p], 60]], requires: [`Own ${PROFESSIONS[p].name} L3`, `${PROFESSIONS[p].name} Lv 40`], drives: 'Level everything' };
+      return { cost: [[ref(p, 3), 50], ['antrom_essence', 60], [COMBO_L3[p], 60], [ref('assassin', 3), 20], ['coin', 150000]], requires: [`Own ${PROFESSIONS[p].name} L3`, `${PROFESSIONS[p].name} Lv 40`], drives: 'Level everything' };
   }
 }
 
@@ -147,14 +149,14 @@ for (const p of PROF_IDS) {
   WEARABLES.push({
     id: relic.id, name: relic.name, group: 'relic', profession: p, rarity: 'Mythic', collection: 'Antrom Relics (new)', slot: relic.slot,
     img: `img/item_${relic.id}.jpg`, effect: `A ${relic.slot.toLowerCase()} piece you wear on top of your suit. It does not change your drops. It shows everyone you finished the ${PROFESSIONS[p].name} road.`,
-    cost: [[ref(p, 4), 40], ['antrom_essence', 80], [COMBO_L3[p], 40]],
+    cost: [[ref(p, 4), 40], ['antrom_essence', 80], [COMBO_L3[p], 40], ['coin', 400000]],
     requires: [`Own ${PROFESSIONS[p].name} L4`, `${PROFESSIONS[p].name} Lv 50`], drives: 'Keep gathering after L4'
   });
 }
 WEARABLES.push({
   id: 'guildstone_crown', name: 'Guildstone Crown', group: 'crown', rarity: 'Unique', collection: 'Antrom Relics (new)', slot: 'Head',
   img: 'img/item_guildstone_crown.jpg', effect: 'The last thing in the game to craft. Very few will ever exist, and the leaderboard shows who has one.',
-  cost: [['guildstone_shard', 50], ['antrom_essence', 150]], relics: true,
+  cost: [['guildstone_shard', 50], ['antrom_essence', 150], ['coin', 1000000]], relics: true,
   requires: ['Own all four Relics', 'All four professions at L4'], drives: 'The last thing anyone crafts'
 });
 
