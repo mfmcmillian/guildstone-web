@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guildstone — Antrom AFK catalogue</title>
+  <link rel="icon" href="img/item_guildstone_ring.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <img src="img/item_guildstone_ring.jpg" alt="" />
+      <div>
+        <h1>Guildstone</h1>
+        <p>Antrom AFK — every wearable you can earn, and what it takes</p>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-tab="wearables" class="active">Wearables</button>
+      <button data-tab="materials">Materials</button>
+      <button data-tab="road">The Road</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="tab-wearables" class="tab active">
+      <div class="filters" id="wearable-filters"></div>
+      <div id="wearables"></div>
+    </section>
+
+    <section id="tab-materials" class="tab">
+      <div class="filters" id="material-filters"></div>
+      <div id="materials"></div>
+    </section>
+
+    <section id="tab-road" class="tab">
+      <div class="road-head">
+        <div>
+          <h2>How long the road is</h2>
+          <p class="muted">One player, one profession at a time. Away progress counts, so "hours per day" is how long the ring is working for you, not how long you are at the keyboard.</p>
+        </div>
+        <label class="hours">Ring time per day
+          <select id="hours">
+            <option>2</option><option>4</option><option selected>6</option><option>8</option><option>12</option>
+          </select> h
+        </label>
+      </div>
+      <ol id="road"></ol>
+      <div class="rules">
+        <h3>How gates work</h3>
+        <ul>
+          <li>Wearing a suit of tier N makes the tier N+1 raw drop appear in that profession's zone. Nothing is shown before then.</li>
+          <li>Combination drops need two suits (or all four). They roll in both zones so you keep earning them whichever of the two you work.</li>
+          <li>Rare drops accumulate as a fraction every cycle on the server — no luck, no streaks. The listed rate is exact on average.</li>
+          <li>Base materials sell for coins at the Depot. Everything above T0 is craft-only.</li>
+          <li>Suits you already own from the marketplace count. You skip that craft and the next tier's drop is already unlocked.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <aside id="detail" class="detail hidden" aria-live="polite"></aside>
+  <div id="scrim" class="scrim hidden"></div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
