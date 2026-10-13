@@ -52,8 +52,7 @@ function wearableCard(w) {
     w.cost.length ? el('div', { class: 'label' }, 'Costs') : null,
     w.cost.length ? el('div', { class: 'cost' }, w.relics ? el('span', { class: 'mat relic' }, el('img', { src: 'img/suit.png', alt: '' }), el('span', { class: 'n' }, 4), el('span', null, 'Relics')) : null, ...w.cost.map(([m, n]) => matChip(m, n))) : null,
     el('div', { class: 'label' }, 'Requires'),
-    el('ul', { class: 'req' }, ...w.requires.map((r) => el('li', null, r))),
-    el('div', { class: 'drives' }, w.drives)
+    el('ul', { class: 'req' }, ...w.requires.map((r) => el('li', null, r)))
   );
   return el('article', { class: 'card', style: `--accent:${accent}` }, art, body);
 }
