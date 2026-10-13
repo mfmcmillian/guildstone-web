@@ -25,18 +25,29 @@ const GROUPS = [
 
 /* ---------- Tabs (hash-routed so sections can be linked) ---------- */
 const TAB_IDS = ['wearables', 'materials', 'how'];
-function showTab(id, push = true) {
+function showTab(id, push = true, scrollTop = true) {
   if (!TAB_IDS.includes(id)) id = 'wearables';
   for (const x of $('#tabs').children) x.classList.toggle('active', x.dataset.tab === id);
   for (const t of document.querySelectorAll('.tab')) t.classList.toggle('active', t.id === `tab-${id}`);
+  document.body.dataset.tab = id;
   if (push && location.hash !== `#${id}`) history.replaceState(null, '', id === 'wearables' ? location.pathname : `#${id}`);
-  window.scrollTo({ top: 0 });
+  if (scrollTop) window.scrollTo({ top: 0 });
 }
 $('#tabs').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-tab]');
   if (b) showTab(b.dataset.tab);
 });
-window.addEventListener('hashchange', () => showTab(location.hash.slice(1), false));
+function routeFromHash() {
+  const h = location.hash.slice(1);
+  if (h === 'suits') {
+    // In-page anchor on the landing tab: switch tabs without jumping to the top, then let the anchor scroll.
+    showTab('wearables', false, false);
+    requestAnimationFrame(() => $('#suits').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  } else {
+    showTab(h, false);
+  }
+}
+window.addEventListener('hashchange', routeFromHash);
 
 /* ---------- Shared pieces ---------- */
 function matChip(id, amount) {
@@ -58,7 +69,6 @@ function wearableCard(w) {
   );
   const body = el('div', { class: 'body' },
     el('h3', null, w.name),
-    w.collection ? el('div', { class: 'collection' }, w.slot ? `${w.collection} · ${w.slot}` : w.collection) : null,
     el('div', { class: 'effect' }, w.effect),
     w.cost.length ? el('div', { class: 'label' }, w.planned ? 'Planned recipe' : 'What it costs to craft') : null,
     w.cost.length ? el('div', { class: 'cost' }, w.relics ? el('span', { class: 'mat relic' }, el('img', { src: 'img/suit.png', alt: '' }), el('span', { class: 'n' }, 4), el('span', null, 'Relics')) : null, ...w.cost.map(([m, n]) => matChip(m, n))) : null,
@@ -201,12 +211,26 @@ function openMaterial(id) {
   scrim.classList.remove('hidden');
 }
 
-/* ---------- Hero stats ---------- */
-function renderStats() {
-  const suits = WEARABLES.filter((w) => w.level).length;
-  const materials = Object.values(MATERIALS).filter((m) => m.kind !== 'currency').length;
-  const stats = [[PROF_IDS.length, 'professions'], [suits, 'suits to wear'], [materials, 'materials'], ['3 s', 'per work cycle']];
-  $('#hero-stats').replaceChildren(...stats.map(([n, label]) => el('div', { class: 'stat' }, el('strong', null, n), el('span', null, label))));
+/* ---------- Landing: zone cards ---------- */
+const ZONE_ART = { lumberjack: 'img/zone_lumber.jpg', miner: 'img/zone_quarry.jpg', butcher: 'img/zone_hunt.jpg', assassin: 'img/zone_bones.jpg' };
+function renderZones() {
+  const grid = $('#zone-grid');
+  grid.replaceChildren(...PROF_IDS.map((p) => {
+    const info = PROFESSIONS[p];
+    const first = LADDER[p][0][1];
+    const last = LADDER[p][4][1];
+    return el('button', { class: 'zone', style: `--accent:${info.color}`, onclick: () => {
+      wearableFilter = p; renderWearableFilters(); renderWearables();
+      $('#suits').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } },
+      el('img', { src: ZONE_ART[p], alt: info.zone, loading: 'lazy' }),
+      el('div', { class: 'zone-body' },
+        el('span', { class: 'zone-kicker' }, el('img', { src: info.icon, alt: '' }), info.name),
+        el('h3', null, info.zone),
+        el('p', null, p === 'assassin' ? `${first} to ${last}. Suits bought, not crafted.` : `${first} to ${last}. Four suits to craft.`)
+      )
+    );
+  }));
   $('#hero-cta').addEventListener('click', () => showTab('how'));
 }
 
@@ -215,5 +239,5 @@ renderWearableFilters();
 renderWearables();
 renderMaterialFilters();
 renderMaterials();
-renderStats();
-showTab(location.hash.slice(1), false);
+renderZones();
+routeFromHash();
