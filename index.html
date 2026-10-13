@@ -4,21 +4,32 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Guildstone — Antrom AFK catalogue</title>
+  <meta name="description" content="Every suit you can earn with the Antrom Guildstone Ring in Decentraland, the materials behind it, and how the idle loop works." />
+  <meta name="theme-color" content="#15121d" />
+  <link rel="canonical" href="https://guildstone.dev/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Guildstone" />
+  <meta property="og:title" content="Guildstone — Antrom AFK catalogue" />
+  <meta property="og:description" content="Every suit you can earn with the Antrom Guildstone Ring, the materials behind it, and how the idle loop works." />
+  <meta property="og:url" content="https://guildstone.dev/" />
+  <meta property="og:image" content="https://guildstone.dev/img/item_guildstone_ring.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
   <link rel="icon" href="img/item_guildstone_ring.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="top">
-    <div class="brand">
+    <a class="brand" href="/">
       <img src="img/item_guildstone_ring.jpg" alt="" />
       <div>
         <h1>Guildstone</h1>
         <p>Antrom AFK — every wearable you can earn, and what it takes</p>
       </div>
-    </div>
-    <nav class="tabs" id="tabs">
+    </a>
+    <nav class="tabs" id="tabs" aria-label="Sections">
       <button data-tab="wearables" class="active">Wearables</button>
       <button data-tab="materials">Materials</button>
       <button data-tab="how">How it works</button>
@@ -27,34 +38,101 @@
 
   <main>
     <section id="tab-wearables" class="tab active">
+      <div class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">Knights of Antrom · Decentraland smart wearable</span>
+          <h2>Earn every suit. Wear the proof.</h2>
+          <p>Put on the Guildstone Ring and work a zone anywhere in Decentraland. Base materials every few seconds, rarer ones as you climb, and each suit you craft unlocks the next tier. No shortcuts: time, the right suit, and your guild.</p>
+          <div class="hero-actions">
+            <button class="btn primary" id="hero-cta">How it works</button>
+            <a class="btn ghost" href="https://decentraland.org/marketplace/" target="_blank" rel="noopener">Decentraland Marketplace</a>
+          </div>
+        </div>
+        <div class="hero-art">
+          <img src="img/item_guildstone_ring.jpg" alt="Antrom Guildstone Ring" />
+        </div>
+        <div class="hero-stats" id="hero-stats"></div>
+      </div>
       <div class="filters" id="wearable-filters"></div>
-      <div id="wearables"></div>
+      <div id="wearable-list"></div>
     </section>
 
     <section id="tab-materials" class="tab">
+      <div class="section-head">
+        <h2>Materials</h2>
+        <p>Everything the Workshop and the suits consume. Base materials drop every cycle; tier materials need the matching suit; combination drops need two or more.</p>
+      </div>
       <div class="filters" id="material-filters"></div>
-      <div id="materials"></div>
+      <div id="material-list"></div>
     </section>
 
     <section id="tab-how" class="tab">
-      <div class="rules">
+      <div class="section-head">
         <h2>How it works</h2>
-        <ul>
-          <li>Put on your Guildstone Ring and work in a zone. You collect that zone's base material every few seconds.</li>
-          <li>Take base materials to the Workshop to refine them. Refined materials are what suits are made of.</li>
-          <li>Craft the L1 suit for your profession. Wear it and a new, rarer material starts dropping in that zone. That material is what the L2 suit is made of, and so on up to L4.</li>
-          <li>Suits do not make you gather faster. They are keys. Rare materials come at a fixed pace per work cycle no matter what you wear or how strong your guild is, so time is the only thing that makes them.</li>
-          <li>Some materials only drop while you wear suits from two professions at once, and a few need all four. You cannot finish one profession without working on the others.</li>
-          <li>Rare drops are steady. Every work cycle adds a little progress toward the next one, so the rates you see here are the least you will get. On top of that, every rare drop has a small chance (5%) to come as two. Your guild's Prospector tech raises that chance, up to 25%.</li>
-          <li>Only base materials can be sold for coins. Everything else is for crafting. Every suit, Relic and the Crown also costs coins, and the price climbs fast.</li>
-          <li>The Skeleton Yard feeds everyone. Fang Powder, Skull Charm and Wraith Ash go into the L2, L3 and L4 suits of every profession, so every player needs the Assassin pieces eventually.</li>
-          <li>Assassin is different: the Ether Assassin pieces are bought in the Decentraland Marketplace, not crafted. Wear them and the Skeleton Yard unlocks the same way.</li>
-          <li>If you already own any suit from the marketplace, you do not have to craft it. Wear it and keep going.</li>
-          <li>Played Antrom? Beast Pelts you earned in the Wild Lands are given to you here as well, and you keep them in Antrom.</li>
-        </ul>
+        <p>The whole loop on one page. Every number here mirrors the live server.</p>
+      </div>
+
+      <div class="how-grid">
+        <article class="rule">
+          <span class="step">1</span>
+          <h3>Work a zone</h3>
+          <p>Wear the Ring, pick a profession and you gather that zone's base material every <strong>3-second cycle</strong>: Wood at the Lumber Camp, Rock at the Quarry, Meat at the Hunting Grounds, Bone at the Skeleton Yard. Keep working while you are away and the server pays you out when you come back.</p>
+        </article>
+        <article class="rule">
+          <span class="step">2</span>
+          <h3>Bank and refine</h3>
+          <p>Your backpack fills up; tap the bag and it is banked. From the Bank you sell base materials for coins (Wood and Rock 2, Meat and Bone 3). The Workshop refines <strong>10 base</strong> into 1 Plank, Brick, Jerky or Bonedust, which sell for 30 to 40 and are what suits are made of.</p>
+        </article>
+        <article class="rule">
+          <span class="step">3</span>
+          <h3>Suits are keys</h3>
+          <p>Craft the L1 suit for your profession (Lv 10). Wear it and a new, rarer material starts dropping in that zone, which the L2 suit is made of, and so on up to L4. Suits never speed you up; they unlock what can drop. Already own a suit from the Marketplace? Wear it and keep going.</p>
+        </article>
+        <article class="rule">
+          <span class="step">4</span>
+          <h3>Rare drops are steady</h3>
+          <p>Tier materials come at a fixed pace: <strong>1 in 40</strong> cycles for Tier 1, then 1 in 120, 300 and 800. Every cycle adds progress toward the next one, so the rates are a floor, not a lottery. Each rare drop has a <strong>5%</strong> chance to arrive doubled; your guild's Prospector tech lifts that to 25%.</p>
+        </article>
+        <article class="rule">
+          <span class="step">5</span>
+          <h3>Professions overlap</h3>
+          <p>Some materials only drop while you wear suits from two professions at once, and Antrom Essence and the Guildstone Shard need all four. The Skeleton Yard feeds everyone: Fang Powder, Skull Charm and Wraith Ash go into the L2, L3 and L4 suits of every profession.</p>
+        </article>
+        <article class="rule">
+          <span class="step">6</span>
+          <h3>Assassin is bought, not crafted</h3>
+          <p>The Ether Assassin pieces are sold in the Decentraland Marketplace. Wearing them unlocks the Skeleton Yard tiers exactly like crafted suits unlock theirs. Played Antrom? Beast Pelts you earned in the Wild Lands are credited here too, and you keep them in Antrom.</p>
+        </article>
+      </div>
+
+      <div class="boosts">
+        <div class="section-head small">
+          <h3>What multiplies your gathering</h3>
+          <p>Bonuses stack multiplicatively on the base of 1 item per cycle. Whole items are paid out; fractions carry over to the next cycle.</p>
+        </div>
+        <div class="boost-grid">
+          <div class="boost"><strong>Ration</strong><span>×1.5 for 10 minutes. 5 Berries or 20 Jerky in the Shop.</span></div>
+          <div class="boost"><strong>Tools</strong><span>+10% per tier, five tiers (Lv 1, 10, 20, 30, 40). Crafted at the Tool Bench from refined materials.</span></div>
+          <div class="boost"><strong>Profession level</strong><span>+5% at Lv 5, 15, 25 … 95. Up to +50%.</span></div>
+          <div class="boost"><strong>Guild HQ</strong><span>+0.5% to every zone per HQ level. HQ 100 is +50% for every member.</span></div>
+          <div class="boost"><strong>Guild tech</strong><span>Wood Boost and Stone Boost +10% per level, Meat Boost +4%, Loot Luck +2% Bone and +10 backpack. XP Boost, Craft Discount, Merchant and more unlock as the HQ grows.</span></div>
+          <div class="boost"><strong>Lucky</strong><span>Doubles what hand clicks pay for 10 minutes. 8 Berries or 20 Bonedust.</span></div>
+        </div>
       </div>
     </section>
   </main>
+
+  <footer class="foot">
+    <div>
+      <strong>Guildstone</strong> · a Knights of Antrom project for Decentraland
+    </div>
+    <div class="foot-links">
+      <a href="#materials">Materials</a>
+      <a href="#how">How it works</a>
+      <a href="https://decentraland.org/marketplace/" target="_blank" rel="noopener">Marketplace</a>
+      <a href="https://github.com/mfmcmillian/guildstone-web" target="_blank" rel="noopener">Source</a>
+    </div>
+  </footer>
 
   <aside id="detail" class="detail hidden" aria-live="polite"></aside>
   <div id="scrim" class="scrim hidden"></div>

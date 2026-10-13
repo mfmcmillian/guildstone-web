@@ -90,7 +90,7 @@ for (const c of COMBOS) {
 }
 // Loyalty treat: Beast Pelts earned in Antrom (Wild Lands bears and bounties) are credited here too.
 MATERIALS.hide.note = 'Played Antrom? Any Beast Pelts you earned in the Wild Lands are given to you here as well. You keep them in Antrom too.';
-MATERIALS.coin = { id: 'coin', name: 'Coins', kind: 'currency', tier: 'T0', gate: 'Sell base materials at the Depot. Wood and Rock sell for 2, Meat and Bone for 3, and the refined versions for 30 to 40 each, so refine before you sell.', img: 'img/coin.png', sellable: false };
+MATERIALS.coin = { id: 'coin', name: 'Coins', kind: 'currency', tier: 'T0', gate: 'Sell base materials from your Bank. Wood and Rock sell for 2, Meat and Bone for 3, and the refined versions for 30 to 40 each, so refine before you sell.', img: 'img/coin.png', sellable: false };
 
 /* Existing suit wearables (Polygon collections). Thumbnails come from the catalyst. */
 const SUIT_COLLECTION = 'urn:decentraland:matic:collections-v2:0xf676c2e2768f415a10fa1703a5100141084f63b5';
@@ -134,9 +134,9 @@ const RELICS = {
 
 const WEARABLES = [];
 WEARABLES.push({
-  id: 'guildstone_ring', name: 'Antrom Guildstone Ring', group: 'ring', rarity: 'Legendary', collection: 'Citrine Ring collection',
-  img: 'img/item_guildstone_ring.jpg', effect: 'Smart wearable: gather anywhere in Decentraland, open your backpack, guild and professions from any scene.',
-  cost: [], requires: ['Free claim at the Antrom camp'], drives: 'The launcher. Everything below is earned while wearing it.'
+  id: 'guildstone_ring', name: 'Antrom Guildstone Ring', group: 'ring', rarity: 'Legendary', collection: 'Knights of Antrom · Hands',
+  img: 'img/item_guildstone_ring.jpg', effect: 'Smart wearable: gather anywhere in Decentraland, and run your Bank, Workshop, guild and professions from the HUD in any scene.',
+  cost: [], requires: ['Legendary smart wearable by Knights of Antrom', 'Launch details announced in the Antrom community'], drives: 'The launcher. Everything below is earned while wearing it.'
 });
 for (const p of PROF_IDS) {
   for (let level = 1; level <= 4; level++) {
@@ -154,17 +154,18 @@ for (const p of PROF_IDS) {
     });
   }
 }
+// Relics and the Crown are the designed endgame; they are not craftable in the live game yet (`planned`).
 for (const p of PROF_IDS) {
   const relic = RELICS[p];
   WEARABLES.push({
-    id: relic.id, name: relic.name, group: 'relic', profession: p, rarity: 'Mythic', collection: 'Antrom Relics (new)', slot: relic.slot,
+    id: relic.id, name: relic.name, group: 'relic', profession: p, rarity: 'Mythic', collection: 'Antrom Relics (planned)', slot: relic.slot, planned: true,
     img: `img/item_${relic.id}.jpg`, effect: `A ${relic.slot.toLowerCase()} piece you wear on top of your suit. It does not change your drops. It shows everyone you finished the ${PROFESSIONS[p].name} road.`,
     cost: [[ref(p, 4), 40], ['antrom_essence', 80], [COMBO_L3[p], 40], ['coin', 400000]],
     requires: [`Own ${PROFESSIONS[p].name} L4`, `${PROFESSIONS[p].name} Lv 50`], drives: 'Keep gathering after L4'
   });
 }
 WEARABLES.push({
-  id: 'guildstone_crown', name: 'Guildstone Crown', group: 'crown', rarity: 'Unique', collection: 'Antrom Relics (new)', slot: 'Head',
+  id: 'guildstone_crown', name: 'Guildstone Crown', group: 'crown', rarity: 'Unique', collection: 'Antrom Relics (planned)', slot: 'Head', planned: true,
   img: 'img/item_guildstone_crown.jpg', effect: 'The last thing in the game to craft. Very few will ever exist, and the leaderboard shows who has one.',
   cost: [['guildstone_shard', 50], ['antrom_essence', 150], ['coin', 1000000]], relics: true,
   requires: ['Own all four Relics', 'All four professions at L4'], drives: 'The last thing anyone crafts'

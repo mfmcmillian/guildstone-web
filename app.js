@@ -15,21 +15,28 @@ const el = (tag, attrs = {}, ...children) => {
 
 const TIER_LABEL = { T0: 'Base', T1: 'Tier 1', T2: 'Tier 2', T3: 'Tier 3', T4: 'Tier 4', C2: 'Pair drop', C3: 'Pair drop', C4: 'Set drop', C5: 'Apex drop' };
 const GROUPS = [
-  { id: 'ring', title: 'The Ring', blurb: 'Free. Wear it to play.', accent: '#ffd23f' },
+  { id: 'ring', title: 'The Ring', blurb: 'The smart wearable that runs the game. Wear it to play.', accent: '#ffd23f' },
   ...PROF_IDS.map((p) => ({ id: p, title: `${PROFESSIONS[p].name} suits`, blurb: p === 'assassin'
     ? 'Not crafted. Buy the Ether Assassin pieces in the Decentraland Marketplace. Wearing them unlocks the Skeleton Yard the same way crafted suits unlock their zones.'
     : 'Four suits, crafted in order from L1 to L4. Each one you wear makes the next one possible.', accent: PROFESSIONS[p].color })),
-  { id: 'relic', title: 'Relics', blurb: 'One per profession, for players who finish all four suits of that profession.', accent: '#ffd23f' },
-  { id: 'crown', title: 'Guildstone Crown', blurb: 'For players who own all four Relics. The last thing to craft.', accent: '#a259ff' }
+  { id: 'relic', title: 'Relics', blurb: 'Planned. One per profession, for players who finish all four suits of that profession. Recipes are design targets and may change before release.', accent: '#ff63e1' },
+  { id: 'crown', title: 'Guildstone Crown', blurb: 'Planned. For players who own all four Relics. The last thing to craft.', accent: '#ffb626' }
 ];
 
-/* ---------- Tabs ---------- */
+/* ---------- Tabs (hash-routed so sections can be linked) ---------- */
+const TAB_IDS = ['wearables', 'materials', 'how'];
+function showTab(id, push = true) {
+  if (!TAB_IDS.includes(id)) id = 'wearables';
+  for (const x of $('#tabs').children) x.classList.toggle('active', x.dataset.tab === id);
+  for (const t of document.querySelectorAll('.tab')) t.classList.toggle('active', t.id === `tab-${id}`);
+  if (push && location.hash !== `#${id}`) history.replaceState(null, '', id === 'wearables' ? location.pathname : `#${id}`);
+  window.scrollTo({ top: 0 });
+}
 $('#tabs').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-tab]');
-  if (!b) return;
-  for (const x of $('#tabs').children) x.classList.toggle('active', x === b);
-  for (const t of document.querySelectorAll('.tab')) t.classList.toggle('active', t.id === `tab-${b.dataset.tab}`);
+  if (b) showTab(b.dataset.tab);
 });
+window.addEventListener('hashchange', () => showTab(location.hash.slice(1), false));
 
 /* ---------- Shared pieces ---------- */
 function matChip(id, amount) {
@@ -46,18 +53,20 @@ function wearableCard(w) {
   const art = el('div', { class: 'art' },
     el('img', { src: w.img, alt: w.name, loading: 'lazy' }),
     w.level ? el('span', { class: 'lvl' }, `L${w.level}`) : null,
-    el('span', { class: 'rarity' }, w.rarity)
+    el('span', { class: `rarity r-${w.rarity.toLowerCase()}` }, w.rarity),
+    w.planned ? el('span', { class: 'planned' }, 'Coming soon') : null
   );
   const body = el('div', { class: 'body' },
     el('h3', null, w.name),
+    w.collection ? el('div', { class: 'collection' }, w.slot ? `${w.collection} · ${w.slot}` : w.collection) : null,
     el('div', { class: 'effect' }, w.effect),
-    w.cost.length ? el('div', { class: 'label' }, 'What it costs to craft') : null,
+    w.cost.length ? el('div', { class: 'label' }, w.planned ? 'Planned recipe' : 'What it costs to craft') : null,
     w.cost.length ? el('div', { class: 'cost' }, w.relics ? el('span', { class: 'mat relic' }, el('img', { src: 'img/suit.png', alt: '' }), el('span', { class: 'n' }, 4), el('span', null, 'Relics')) : null, ...w.cost.map(([m, n]) => matChip(m, n))) : null,
     el('div', { class: 'label' }, w.cost.length ? 'Before you can craft it' : 'How you get it'),
     el('ul', { class: 'req' }, ...w.requires.map((r) => el('li', null, r))),
     w.buy ? el('a', { class: 'buy', href: w.buy, target: '_blank', rel: 'noopener' }, 'Open in Marketplace') : null
   );
-  return el('article', { class: 'card', style: `--accent:${accent}` }, art, body);
+  return el('article', { class: `card${w.planned ? ' is-planned' : ''}`, style: `--accent:${accent}` }, art, body);
 }
 
 /* ---------- Wearables tab ---------- */
@@ -72,14 +81,14 @@ function renderWearableFilters() {
   }
 }
 function renderWearables() {
-  const root = $('#wearables');
+  const root = $('#wearable-list');
   root.replaceChildren();
   for (const g of GROUPS) {
     if (wearableFilter !== 'all' && wearableFilter !== g.id) continue;
     const items = WEARABLES.filter((w) => w.group === g.id);
     root.append(el('section', { class: 'group', style: `--accent:${g.accent}` },
       el('div', { class: 'group-head' }, el('h2', null, g.title), el('p', null, g.blurb)),
-      el('div', { class: 'grid' }, ...items.map(wearableCard))
+      el('div', { class: `grid${items.length === 1 ? ' feature' : ''}` }, ...items.map(wearableCard))
     ));
   }
 }
@@ -119,23 +128,28 @@ function materialCard(m) {
   );
 }
 function renderMaterials() {
-  const root = $('#materials');
+  const root = $('#material-list');
   root.replaceChildren();
   const sections = [];
   if (materialFilter === 'all' || materialFilter in PROFESSIONS) {
     const profs = materialFilter === 'all' ? PROF_IDS : [materialFilter];
     for (const p of profs) {
-      const ids = LADDER[p].flatMap(([raw, , ref]) => [raw, ref]);
-      sections.push({ title: `${PROFESSIONS[p].name} · ${PROFESSIONS[p].zone}`, blurb: 'Each pair is one material you collect and the refined version the Workshop makes from it. Each pair unlocks with the next suit.', accent: PROFESSIONS[p].color, ids });
+      // Raw -> refined pairs, one per tier, so the ladder reads left to right.
+      const pairs = LADDER[p].map(([raw, , ref]) => [raw, ref]);
+      sections.push({ title: `${PROFESSIONS[p].name} · ${PROFESSIONS[p].zone}`, blurb: 'Each pair is one material you collect and the refined version the Workshop makes from it. Each pair unlocks with the next suit.', accent: PROFESSIONS[p].color, pairs });
     }
   }
   if (materialFilter === 'all' || materialFilter === 'combo') {
     sections.push({ title: 'Combination drops', blurb: 'These only drop while you wear suits from more than one profession at the same time.', accent: '#ffd23f', ids: COMBOS.map((c) => c.id) });
   }
   for (const s of sections) {
+    const body = s.pairs
+      ? el('div', { class: 'pairs' }, ...s.pairs.map(([raw, ref]) => el('div', { class: 'pair' },
+          materialCard(MATERIALS[raw]), el('span', { class: 'arrow', 'aria-hidden': 'true' }, '→'), materialCard(MATERIALS[ref]))))
+      : el('div', { class: 'grid compact' }, ...s.ids.map((id) => materialCard(MATERIALS[id])));
     root.append(el('section', { class: 'group', style: `--accent:${s.accent}` },
       el('div', { class: 'group-head' }, el('h2', null, s.title), el('p', null, s.blurb)),
-      el('div', { class: 'grid compact' }, ...s.ids.map((id) => materialCard(MATERIALS[id])))
+      body
     ));
   }
 }
@@ -160,9 +174,9 @@ function openMaterial(id) {
   } else {
     kv.push(['Where it drops', `While working at the ${zones}.`]);
     kv.push(['What you must wear', m.gate === 'No suit needed' ? 'Nothing special. Everyone gets this from the start.' : m.gate.replace(/^Wear /, '') + '.']);
-    kv.push(['How often', m.rate ? `About 1 every ${m.rate.toLocaleString()} work cycles, roughly ${perHour} an hour.` : 'Every work cycle (3 seconds). Suits, tools and your guild multiply it.']);
+    kv.push(['How often', m.rate ? `About 1 every ${m.rate.toLocaleString()} work cycles, roughly ${perHour} an hour.` : 'Every work cycle (3 seconds). Tools, profession level, Rations and your guild multiply it.']);
   }
-  kv.push(['Can you sell it?', m.sellable ? 'Yes, at the Depot for coins.' : 'No. It is only for crafting.']);
+  kv.push(['Can you sell it?', m.sellable ? 'Yes, from your Bank for coins.' : 'No. It is only for crafting.']);
   if (m.note) kv.push(['Good to know', m.note]);
 
   detail.replaceChildren(...[
@@ -187,8 +201,19 @@ function openMaterial(id) {
   scrim.classList.remove('hidden');
 }
 
+/* ---------- Hero stats ---------- */
+function renderStats() {
+  const suits = WEARABLES.filter((w) => w.level).length;
+  const materials = Object.values(MATERIALS).filter((m) => m.kind !== 'currency').length;
+  const stats = [[PROF_IDS.length, 'professions'], [suits, 'suits to wear'], [materials, 'materials'], ['3 s', 'per work cycle']];
+  $('#hero-stats').replaceChildren(...stats.map(([n, label]) => el('div', { class: 'stat' }, el('strong', null, n), el('span', null, label))));
+  $('#hero-cta').addEventListener('click', () => showTab('how'));
+}
+
 /* ---------- Go ---------- */
 renderWearableFilters();
 renderWearables();
 renderMaterialFilters();
 renderMaterials();
+renderStats();
+showTab(location.hash.slice(1), false);
