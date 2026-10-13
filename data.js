@@ -36,9 +36,9 @@ const LADDER = {
   ],
   butcher: [
     ['meat', 'Meat', 'jerky', 'Jerky'],
-    ['hide', 'Hide', 'leather', 'Leather'],
+    ['hide', 'Beast Pelt', 'leather', 'Leather'],
     ['horn', 'Horn', 'horn_plate', 'Horn Plate'],
-    ['prime_pelt', 'Prime Pelt', 'royal_leather', 'Royal Leather'],
+    ['prime_pelt', 'Alpha Hide', 'royal_leather', 'Royal Leather'],
     ['behemoth_hide', 'Behemoth Hide', 'behemoth_plate', 'Behemoth Plate']
   ],
   assassin: [
@@ -164,26 +164,3 @@ WEARABLES.push({
 const USED_IN = {};
 for (const w of WEARABLES) for (const [m] of w.cost) (USED_IN[m] = USED_IN[m] || []).push(w.id);
 for (const p of PROF_IDS) LADDER[p].forEach(([rawId, , refId]) => { (USED_IN[rawId] = USED_IN[rawId] || []).push(`refine:${refId}`); });
-
-/* Pacing (one player, one profession at a time, hours of ring time per day).
-   Three professions are crafted; Assassin pieces are bought, so they cost no ring time. */
-const CYCLES_PER_HOUR = 1200;
-const CRAFTED_PROFESSIONS = 3;
-const STEP_CYCLES = { L1: 6000, L2: 400 * 40, L3: 300 * 120, L4: 250 * 300, Relic: 200 * 800 };
-const SHARD_CYCLES = 50 * 5000;
-function milestones(hoursPerDay) {
-  const d = (c) => c / CYCLES_PER_HOUR / hoursPerDay;
-  const n = CRAFTED_PROFESSIONS;
-  const l1 = n * STEP_CYCLES.L1, l2 = l1 + n * STEP_CYCLES.L2, l3 = l2 + n * STEP_CYCLES.L3;
-  const allL4 = l3 + n * STEP_CYCLES.L4;
-  return [
-    ['First L1 suit', d(STEP_CYCLES.L1)],
-    ['First L2 suit', d(STEP_CYCLES.L1 + STEP_CYCLES.L2)],
-    ['Every L2 suit crafted', d(l2)],
-    ['Every L3 suit crafted', d(l3)],
-    ['First L4 suit', d(l3 + STEP_CYCLES.L4)],
-    ['Every L4 suit crafted', d(allL4)],
-    ['All four Relics', d(allL4 + 4 * STEP_CYCLES.Relic)],
-    ['Guildstone Crown', d(allL4 + Math.max(4 * STEP_CYCLES.Relic, SHARD_CYCLES))]
-  ];
-}

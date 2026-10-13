@@ -186,23 +186,8 @@ function openMaterial(id) {
   scrim.classList.remove('hidden');
 }
 
-/* ---------- Road tab ---------- */
-function renderRoad() {
-  const hours = Number($('#hours').value);
-  const ms = milestones(hours);
-  const max = ms[ms.length - 1][1];
-  const list = $('#road');
-  list.replaceChildren(...ms.map(([label, days]) => el('li', null,
-    el('span', null, label),
-    el('span', { class: 'bar' }, el('i', { style: `width:${Math.max(1.5, (days / max) * 100)}%` })),
-    el('span', { class: 'days' }, days < 1 ? '< 1 day' : `${Math.round(days)} days`)
-  )));
-}
-$('#hours').addEventListener('change', renderRoad);
-
 /* ---------- Go ---------- */
 renderWearableFilters();
 renderWearables();
 renderMaterialFilters();
 renderMaterials();
-renderRoad();

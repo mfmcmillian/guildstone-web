@@ -101,20 +101,10 @@ main { max-width: 1280px; margin: 0 auto; padding: 24px 28px 80px; }
 .mcard .tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: var(--panel2); color: var(--muted); margin-bottom: 6px; }
 .mcard.locked .tag { color: var(--amethyst); }
 
-/* Road */
-.road-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 20px; }
-.road-head h2 { font-size: 22px; color: var(--gold); margin-bottom: 6px; }
-.road-head p { max-width: 720px; margin: 0; }
-.hours { white-space: nowrap; font-weight: 600; color: var(--muted); }
-.hours select { font: inherit; margin: 0 6px; padding: 6px 10px; border-radius: 8px; background: var(--panel); color: var(--text); border: 1px solid var(--line); }
-#road { list-style: none; padding: 0; margin: 0 0 32px; display: grid; gap: 10px; }
-#road li { display: grid; grid-template-columns: 220px 1fr 90px; align-items: center; gap: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; }
-#road .bar { height: 12px; background: var(--panel2); border-radius: 999px; overflow: hidden; }
-#road .bar i { display: block; height: 100%; background: var(--amethyst); border-radius: 999px; }
-#road .days { font-family: Cinzel, serif; font-weight: 800; color: var(--gold); text-align: right; }
-.rules { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 22px; }
-.rules h3 { font-size: 16px; color: var(--gold); margin-bottom: 8px; }
-.rules ul { margin: 0; padding-left: 18px; color: var(--muted); line-height: 1.6; font-size: 14px; }
+/* How it works */
+.rules { max-width: 820px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 30px; }
+.rules h2 { font-size: 24px; color: var(--gold); margin-bottom: 14px; }
+.rules ul { margin: 0; padding-left: 20px; color: var(--text); line-height: 1.7; font-size: 16px; display: grid; gap: 10px; }
 
 /* Detail drawer */
 .scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 8; }
@@ -138,6 +128,4 @@ main { max-width: 1280px; margin: 0 auto; padding: 24px 28px 80px; }
 @media (max-width: 720px) {
   .top { flex-direction: column; align-items: stretch; }
   .tabs { justify-content: center; }
-  #road li { grid-template-columns: 1fr 70px; }
-  #road .bar { grid-column: 1 / -1; }
 }
