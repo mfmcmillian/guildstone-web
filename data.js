@@ -18,7 +18,9 @@ const TIERS = [
   { id: 'T4', label: 'Tier 4', gate: 'Own that profession\u2019s L4 suit', rate: 800 }
 ];
 
-/* [raw, refined] per tier per profession. Workshop refines 10 base raw (or 5 tier raw) into 1 refined. */
+/* [raw, refined] per tier per profession. Workshop refines 10 base raw into 1 base material; tier refines take
+   5 tier raw plus the profession's base material (10 / 20 / 40 / 80 by tier) so base gathering stays useful. */
+const TIER_BASE_COST = [0, 10, 20, 40, 80];
 const LADDER = {
   lumberjack: [
     ['wood', 'Wood', 'plank', 'Plank'],
@@ -71,8 +73,13 @@ for (const p of PROF_IDS) {
     const needs = t === 0 ? 'No suit needed' : `Wear ${PROFESSIONS[p].name} L${t}+`;
     MATERIALS[rawId] = { id: rawId, name: rawName, kind: 'raw', tier: tier.id, profession: p, zones: [p], gate: needs, rate: tier.rate, img: `img/${t === 0 ? rawId : 'res_' + rawId}.${ext}`, sellable: t === 0 };
     const ratio = t === 0 ? 10 : 5;
-    MATERIALS[refId] = { id: refId, name: refName, kind: 'refined', tier: tier.id, profession: p, from: rawId, ratio, gate: `Workshop: ${ratio} ${rawName}`, img: `img/${t === 0 ? refId : 'res_' + refId}.${ext}`, sellable: t === 0 };
+    const extra = t === 0 ? null : [LADDER[p][0][2], TIER_BASE_COST[t]];
+    MATERIALS[refId] = { id: refId, name: refName, kind: 'refined', tier: tier.id, profession: p, from: rawId, ratio, extra, gate: `Workshop: ${ratio} ${rawName}${extra ? ` + ${extra[1]} ${LADDER[p][0][3]}` : ''}`, img: `img/${t === 0 ? refId : 'res_' + refId}.${ext}`, sellable: t === 0 };
   });
+}
+/* "5 Hardwood + 10 Plank" for a refined material's inputs. */
+function recipeText(m) {
+  return `${m.ratio} ${MATERIALS[m.from].name}${m.extra ? ` + ${m.extra[1]} ${MATERIALS[m.extra[0]].name}` : ''}`;
 }
 for (const c of COMBOS) {
   const parts = Object.entries(c.gate);
@@ -167,3 +174,8 @@ WEARABLES.push({
 const USED_IN = {};
 for (const w of WEARABLES) for (const [m] of w.cost) (USED_IN[m] = USED_IN[m] || []).push(w.id);
 for (const p of PROF_IDS) LADDER[p].forEach(([rawId, , refId]) => { (USED_IN[rawId] = USED_IN[rawId] || []).push(`refine:${refId}`); });
+// Base materials also feed every tier refine in their profession.
+for (const p of PROF_IDS) {
+  const baseRef = LADDER[p][0][2];
+  LADDER[p].forEach(([, , refId], t) => { if (t > 0) (USED_IN[baseRef] = USED_IN[baseRef] || []).push(`refine:${refId}`); });
+}
