@@ -18,7 +18,7 @@ const TIERS = [
   { id: 'T4', label: 'Tier 4', gate: 'Own that profession\u2019s L4 suit', rate: 800 }
 ];
 
-/* [raw, refined] per tier per profession. Workshop refines 5 raw into 1 refined. */
+/* [raw, refined] per tier per profession. Workshop refines 10 base raw (or 5 tier raw) into 1 refined. */
 const LADDER = {
   lumberjack: [
     ['wood', 'Wood', 'plank', 'Plank'],
@@ -70,7 +70,8 @@ for (const p of PROF_IDS) {
     const ext = t === 0 ? 'png' : 'jpg';
     const needs = t === 0 ? 'No suit needed' : `Wear ${PROFESSIONS[p].name} L${t}+`;
     MATERIALS[rawId] = { id: rawId, name: rawName, kind: 'raw', tier: tier.id, profession: p, zones: [p], gate: needs, rate: tier.rate, img: `img/${t === 0 ? rawId : 'res_' + rawId}.${ext}`, sellable: t === 0 };
-    MATERIALS[refId] = { id: refId, name: refName, kind: 'refined', tier: tier.id, profession: p, from: rawId, gate: `Workshop: 5 ${rawName}`, img: `img/${t === 0 ? refId : 'res_' + refId}.${ext}`, sellable: t === 0 };
+    const ratio = t === 0 ? 10 : 5;
+    MATERIALS[refId] = { id: refId, name: refName, kind: 'refined', tier: tier.id, profession: p, from: rawId, ratio, gate: `Workshop: ${ratio} ${rawName}`, img: `img/${t === 0 ? refId : 'res_' + refId}.${ext}`, sellable: t === 0 };
   });
 }
 for (const c of COMBOS) {

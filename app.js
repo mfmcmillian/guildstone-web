@@ -97,7 +97,7 @@ function renderMaterialFilters() {
 }
 function materialCard(m) {
   const lines = [];
-  if (m.kind === 'refined') lines.push(`Workshop · 5 ${MATERIALS[m.from].name}`);
+  if (m.kind === 'refined') lines.push(`Workshop · ${m.ratio} ${MATERIALS[m.from].name}`);
   else if (m.kind === 'currency') lines.push(m.gate);
   else {
     lines.push(`Where: ${m.zones.map((z) => PROFESSIONS[z].zone).join(', ')}`);
@@ -154,7 +154,7 @@ function openMaterial(id) {
   const zones = m.zones ? m.zones.map((z) => PROFESSIONS[z].zone).join(' or ') : '';
   const perHour = m.rate ? (3600 / 3 / m.rate).toFixed(m.rate > 1000 ? 2 : 1) : null;
   if (m.kind === 'refined') {
-    kv.push(['How you get it', `Take 5 ${MATERIALS[m.from].name} to the Workshop and turn them into 1 ${m.name}.`]);
+    kv.push(['How you get it', `Take ${m.ratio} ${MATERIALS[m.from].name} to the Workshop and turn them into 1 ${m.name}.`]);
   } else if (m.kind === 'currency') {
     kv.push(['How you get it', m.gate]);
   } else {
@@ -175,7 +175,7 @@ function openMaterial(id) {
     used.length ? el('div', { class: 'list' }, ...used.map((u) => {
       if (u.startsWith('refine:')) {
         const r = MATERIALS[u.slice(7)];
-        return el('button', { onclick: () => openMaterial(r.id) }, el('img', { src: r.img, alt: '' }), el('span', null, r.name, el('small', null, `5 ${m.name} make 1 ${r.name} at the Workshop`)));
+        return el('button', { onclick: () => openMaterial(r.id) }, el('img', { src: r.img, alt: '' }), el('span', null, r.name, el('small', null, `${r.ratio} ${m.name} make 1 ${r.name} at the Workshop`)));
       }
       const w = WEARABLES.find((x) => x.id === u);
       const amt = w.cost.find(([mm]) => mm === id)[1];
