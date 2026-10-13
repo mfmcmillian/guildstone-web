@@ -93,14 +93,25 @@ function renderMaterialFilters() {
   }
 }
 function materialCard(m) {
-  const where = m.kind === 'refined' ? `Workshop · 5 ${MATERIALS[m.from].name}` : m.kind === 'currency' ? m.gate : `${m.zones.map((z) => PROFESSIONS[z].zone).join(', ')}`;
-  const rate = m.rate ? `1 in ${m.rate.toLocaleString()} cycles` : m.kind === 'raw' ? 'Every cycle' : '';
+  const lines = [];
+  if (m.kind === 'refined') lines.push(`Workshop · 5 ${MATERIALS[m.from].name}`);
+  else if (m.kind === 'currency') lines.push(m.gate);
+  else {
+    lines.push(`Where: ${m.zones.map((z) => PROFESSIONS[z].zone).join(', ')}`);
+    lines.push(m.gate);
+    lines.push(m.rate ? `1 in ${m.rate.toLocaleString()} cycles` : 'Every cycle');
+  }
+  const meta = el('div', { class: 'meta' });
+  lines.forEach((line, i) => {
+    if (i) meta.append(el('br'));
+    meta.append(el('span', { class: line.startsWith('Wear ') ? 'needs' : null }, line));
+  });
   return el('button', { class: `mcard ${m.tier !== 'T0' ? 'locked' : ''}`, style: `--accent:${m.profession ? PROFESSIONS[m.profession].color : '#a259ff'}`, onclick: () => openMaterial(m.id) },
     el('img', { src: m.img, alt: m.name, loading: 'lazy' }),
     el('div', { class: 'body' },
       el('span', { class: 'tag' }, TIER_LABEL[m.tier]),
       el('h4', null, m.name),
-      el('div', { class: 'meta' }, where, rate ? el('br') : null, rate)
+      meta
     )
   );
 }
@@ -139,8 +150,11 @@ function openMaterial(id) {
   const kv = [];
   kv.push(['Type', `${TIER_LABEL[m.tier]} · ${m.kind}`]);
   if (m.kind === 'refined') kv.push(['Made from', `5 × ${MATERIALS[m.from].name} at the Workshop`]);
-  else kv.push(['Appears when', m.gate]);
-  if (m.zones) kv.push(['Drops in', m.zones.map((z) => PROFESSIONS[z].zone).join(', ')]);
+  else if (m.kind === 'currency') kv.push(['How to get', m.gate]);
+  else {
+    kv.push(['Where', m.zones.map((z) => PROFESSIONS[z].zone).join(', ')]);
+    kv.push(['You need', m.gate]);
+  }
   if (m.rate) kv.push(['Drop rate', `1 in ${m.rate.toLocaleString()} cycles  (~${(3600 / 3 / m.rate).toFixed(m.rate > 1000 ? 2 : 1)} per hour)`]);
   else if (m.kind === 'raw') kv.push(['Drop rate', 'Every 3 s cycle, multiplied by your suit, tools and guild']);
   kv.push(['Sellable', m.sellable ? 'Yes — Depot' : 'No — craft only']);

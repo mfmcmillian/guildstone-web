@@ -68,12 +68,17 @@ for (const p of PROF_IDS) {
   LADDER[p].forEach(([rawId, rawName, refId, refName], t) => {
     const tier = TIERS[t];
     const ext = t === 0 ? 'png' : 'jpg';
-    MATERIALS[rawId] = { id: rawId, name: rawName, kind: 'raw', tier: tier.id, profession: p, zones: [p], gate: tier.gate, rate: tier.rate, img: `img/${t === 0 ? rawId : 'res_' + rawId}.${ext}`, sellable: t === 0 };
+    const needs = t === 0 ? 'No suit needed' : `Wear ${PROFESSIONS[p].name} L${t}+`;
+    MATERIALS[rawId] = { id: rawId, name: rawName, kind: 'raw', tier: tier.id, profession: p, zones: [p], gate: needs, rate: tier.rate, img: `img/${t === 0 ? rawId : 'res_' + rawId}.${ext}`, sellable: t === 0 };
     MATERIALS[refId] = { id: refId, name: refName, kind: 'refined', tier: tier.id, profession: p, from: rawId, gate: `Workshop: 5 ${rawName}`, img: `img/${t === 0 ? refId : 'res_' + refId}.${ext}`, sellable: t === 0 };
   });
 }
 for (const c of COMBOS) {
-  MATERIALS[c.id] = { id: c.id, name: c.name, kind: 'combo', tier: c.tier, zones: c.zones, gate: c.gateText, rate: c.rate, img: `img/res_${c.id}.jpg`, sellable: false };
+  const parts = Object.entries(c.gate);
+  const needs = parts.length === 4
+    ? `Wear all four suits at L${parts[0][1]}+`
+    : 'Wear ' + parts.map(([p, l]) => `${PROFESSIONS[p].name} L${l}+`).join(' and ');
+  MATERIALS[c.id] = { id: c.id, name: c.name, kind: 'combo', tier: c.tier, zones: c.zones, gate: needs, rate: c.rate, img: `img/res_${c.id}.jpg`, sellable: false };
 }
 MATERIALS.coin = { id: 'coin', name: 'Coins', kind: 'currency', tier: 'T0', gate: 'Sell base materials at the Depot', img: 'img/coin.png', sellable: false };
 
@@ -101,12 +106,10 @@ function suitRecipe(p, level) {
       return { cost: [[ref(p, 0), 300], ...others.map((o) => [ref(o, 0), 100]), ['coin', 500]], requires: [`${PROFESSIONS[p].name} Lv 10`], drives: 'Visit all four zones once' };
     case 2:
       return { cost: [[ref(p, 1), 80], [ref(p, 0), 600]], requires: [`Own ${PROFESSIONS[p].name} L1`, `${PROFESSIONS[p].name} Lv 20`], drives: 'Commit to a zone' };
-    case 3: {
-      const partner = PROF_IDS.find((o) => o !== p && COMBO_L2[o] === COMBO_L2[p]);
-      return { cost: [[ref(p, 2), 60], [COMBO_L2[p], 100], [ref(p, 1), 40]], requires: [`Own ${PROFESSIONS[p].name} L2`, `${PROFESSIONS[p].name} Lv 30`, `${PROFESSIONS[partner].name} L2 (for ${MATERIALS[COMBO_L2[p]].name})`], drives: 'Level a second profession' };
-    }
+    case 3:
+      return { cost: [[ref(p, 2), 60], [COMBO_L2[p], 100], [ref(p, 1), 40]], requires: [`Own ${PROFESSIONS[p].name} L2`, `${PROFESSIONS[p].name} Lv 30`], drives: 'Level a second profession' };
     case 4:
-      return { cost: [[ref(p, 3), 50], ['antrom_essence', 60], [COMBO_L3[p], 60]], requires: [`Own ${PROFESSIONS[p].name} L3`, `${PROFESSIONS[p].name} Lv 40`, 'All four professions at L3 (for Essence)'], drives: 'Level everything' };
+      return { cost: [[ref(p, 3), 50], ['antrom_essence', 60], [COMBO_L3[p], 60]], requires: [`Own ${PROFESSIONS[p].name} L3`, `${PROFESSIONS[p].name} Lv 40`], drives: 'Level everything' };
   }
 }
 
