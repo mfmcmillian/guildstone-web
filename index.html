@@ -28,6 +28,7 @@
     <nav class="tabs" id="tabs" aria-label="Sections">
       <button data-tab="wearables" class="active">Suits</button>
       <button data-tab="materials">Materials</button>
+      <button data-tab="guilds">Guilds</button>
       <button data-tab="how">How to play</button>
     </nav>
   </header>
@@ -40,6 +41,7 @@
       <p class="tagline">Work the land. Earn every suit. Wear the proof.</p>
       <div class="hero-actions">
         <button class="btn primary" id="hero-cta">How to play</button>
+        <a class="btn ghost" href="#guilds">Guilds &amp; leaderboards</a>
         <a class="btn ghost" href="#suits">Browse the suits</a>
       </div>
     </div>
@@ -72,6 +74,42 @@
       <div id="material-list"></div>
     </section>
 
+    <section id="tab-guilds" class="tab">
+      <div class="section-head lb-head">
+        <div>
+          <h2>Guilds &amp; leaderboards</h2>
+          <p>Live from the game. Who is climbing, which guild is building, and where you stand. Refreshes every minute.</p>
+        </div>
+        <div class="lb-meta" id="lb-meta"></div>
+      </div>
+      <div class="stats" id="lb-stats"></div>
+
+      <div id="lb-status" class="lb-status hidden"></div>
+
+      <section class="group" id="guild-board" style="--accent:#ffd23f">
+        <div class="group-head">
+          <h2>Guild standings</h2>
+          <p>Ranked by HQ level, then tech levels, then lifetime donations. Tap a guild for its roster, tech and top donors.</p>
+        </div>
+        <div id="guild-list"></div>
+        <div id="guild-unclaimed"></div>
+      </section>
+
+      <section class="group" id="player-board" style="--accent:#a259ff">
+        <div class="group-head">
+          <h2>Player leaderboards</h2>
+          <p id="board-hint"></p>
+        </div>
+        <div class="board-bar">
+          <div class="filters" id="board-filters"></div>
+          <label class="search">
+            <input type="search" id="board-search" placeholder="Find a player (name or wallet)" autocomplete="off" spellcheck="false" />
+          </label>
+        </div>
+        <div id="board-list"></div>
+      </section>
+    </section>
+
     <section id="tab-how" class="tab">
       <div class="section-head">
         <h2>How to play</h2>
@@ -101,7 +139,7 @@
         <article class="rule">
           <span class="step">5</span>
           <h3>Grow with your guild</h3>
-          <p>Join or found a guild. Donations raise the HQ and every member gathers faster. Rations, better tools and your own profession level stack on top.</p>
+          <p>Join or found a guild. Donations raise the HQ and every member gathers faster. Rations, better tools and your own profession level stack on top. See who is ahead on the <a href="#guilds">Guilds</a> page.</p>
         </article>
       </div>
     </section>
@@ -111,6 +149,7 @@
     <div><strong>Guildstone</strong> · a Knights of Antrom game for Decentraland</div>
     <div class="foot-links">
       <a href="#materials">Materials</a>
+      <a href="#guilds">Guilds</a>
       <a href="#how">How to play</a>
       <a href="https://decentraland.org/marketplace/" target="_blank" rel="noopener">Marketplace</a>
     </div>
@@ -120,6 +159,7 @@
   <div id="scrim" class="scrim hidden"></div>
 
   <script src="data.js"></script>
+  <script src="guilds.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

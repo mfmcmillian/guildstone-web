@@ -4,10 +4,11 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const el = (tag, attrs = {}, ...children) => {
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === null || v === undefined) continue;
     if (k === 'class') node.className = v;
     else if (k === 'style') node.style.cssText = v;
     else if (k.startsWith('on')) node.addEventListener(k.slice(2), v);
-    else if (v !== null && v !== undefined) node.setAttribute(k, v);
+    else node.setAttribute(k, v);
   }
   for (const c of children.flat()) if (c !== null && c !== undefined) node.append(c.nodeType ? c : document.createTextNode(String(c)));
   return node;
@@ -24,7 +25,7 @@ const GROUPS = [
 ];
 
 /* ---------- Tabs (hash-routed so sections can be linked) ---------- */
-const TAB_IDS = ['wearables', 'materials', 'how'];
+const TAB_IDS = ['wearables', 'materials', 'guilds', 'how'];
 function showTab(id, push = true, scrollTop = true) {
   if (!TAB_IDS.includes(id)) id = 'wearables';
   for (const x of $('#tabs').children) x.classList.toggle('active', x.dataset.tab === id);
@@ -32,17 +33,26 @@ function showTab(id, push = true, scrollTop = true) {
   document.body.dataset.tab = id;
   if (push && location.hash !== `#${id}`) history.replaceState(null, '', id === 'wearables' ? location.pathname : `#${id}`);
   if (scrollTop) window.scrollTo({ top: 0 });
+  Guilds.setVisible(id === 'guilds');
 }
 $('#tabs').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-tab]');
   if (b) showTab(b.dataset.tab);
 });
 function routeFromHash() {
-  const h = location.hash.slice(1);
+  const h = decodeURIComponent(location.hash.slice(1));
   if (h === 'suits') {
     // In-page anchor on the landing tab: switch tabs without jumping to the top, then let the anchor scroll.
     showTab('wearables', false, false);
     requestAnimationFrame(() => $('#suits').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  } else if (h.startsWith('guilds/')) {
+    // #guilds/ELF opens that guild's page.
+    showTab('guilds', false);
+    Guilds.openGuild(h.slice(7));
+  } else if (h.startsWith('board/')) {
+    // #board/miner jumps straight to one player leaderboard.
+    showTab('guilds', false, false);
+    Guilds.showBoard(h.slice(6), true);
   } else {
     showTab(h, false);
   }
@@ -167,7 +177,7 @@ function renderMaterials() {
 /* ---------- Detail drawer ---------- */
 const detail = $('#detail');
 const scrim = $('#scrim');
-function closeDetail() { detail.classList.add('hidden'); scrim.classList.add('hidden'); }
+function closeDetail() { detail.classList.add('hidden'); scrim.classList.add('hidden'); Guilds.onDetailClosed(); }
 scrim.addEventListener('click', closeDetail);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDetail(); });
 
@@ -240,4 +250,5 @@ renderWearables();
 renderMaterialFilters();
 renderMaterials();
 renderZones();
+Guilds.init();
 routeFromHash();
