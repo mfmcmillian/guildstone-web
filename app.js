@@ -25,7 +25,7 @@ const GROUPS = [
 ];
 
 /* ---------- Tabs (hash-routed so sections can be linked) ---------- */
-const TAB_IDS = ['wearables', 'materials', 'guilds', 'how'];
+const TAB_IDS = ['wearables', 'materials', 'guilds', 'online', 'how'];
 function showTab(id, push = true, scrollTop = true) {
   if (!TAB_IDS.includes(id)) id = 'wearables';
   for (const x of $('#tabs').children) x.classList.toggle('active', x.dataset.tab === id);
@@ -33,7 +33,7 @@ function showTab(id, push = true, scrollTop = true) {
   document.body.dataset.tab = id;
   if (push && location.hash !== `#${id}`) history.replaceState(null, '', id === 'wearables' ? location.pathname : `#${id}`);
   if (scrollTop) window.scrollTo({ top: 0 });
-  Guilds.setVisible(id === 'guilds');
+  Guilds.setVisible(id === 'guilds' || id === 'online');
 }
 $('#tabs').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-tab]');

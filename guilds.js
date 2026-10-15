@@ -11,6 +11,9 @@ const Guilds = (() => {
   const RANKS_KEY = 'guildstone.ranks.v1';
   const MAX_ROWS = 100;
   const TOOL_NAMES = { lumberjack: 'Axe', miner: 'Pickaxe', butcher: 'Cleaver', assassin: 'Dagger' };
+  const VERB = { lumberjack: 'Chopping', miner: 'Mining', butcher: 'Hunting', assassin: 'Hunting' };
+  // Ring claims every 15s; the leaderboard snapshot can be up to a minute old. Two minutes covers a missed claim plus cache.
+  const ONLINE_MS = 2 * 60 * 1000;
   // Guild tech, in the order the game shows it (names mirror the wearable client).
   const TECH = {
     woodBoost: ['Lumberjack', '+10% wood per level'], stoneBoost: ['Stonemason', '+10% rock per level'], meatBoost: ['Hunter', '+4% meat per level'],
@@ -38,6 +41,8 @@ const Guilds = (() => {
     return `${Math.floor(s / 86400)}d ago`;
   }
   const activeThisWeek = (p) => Date.now() - p.active < 7 * 86400e3;
+  const isOnline = (p) => (p.workAt || 0) > 0 && Date.now() - p.workAt < ONLINE_MS;
+  const onlinePlayers = () => (state.data?.players || []).filter(isOnline).sort((a, b) => b.workAt - a.workAt);
   // A stable colour per guild tag so the same tag always looks the same across the page.
   function tagHue(tag) {
     let h = 0;
@@ -185,26 +190,103 @@ const Guilds = (() => {
     renderGuilds();
     renderBoardFilters();
     renderBoard();
+    renderOnline();
   }
-  function renderMeta() {
-    const box = $('#lb-meta');
+  function stamp(box) {
+    if (!box) return;
     if (!state.data) return box.replaceChildren();
     box.replaceChildren(
       el('span', null, state.error ? `Last update failed (${state.error}). Showing ${ago(state.data.updatedAt)}.` : `Updated ${ago(state.data.updatedAt)}`),
       el('button', { class: 'chip', onclick: load }, 'Refresh')
     );
   }
+  function renderMeta() {
+    stamp($('#lb-meta'));
+    stamp($('#online-meta'));
+  }
   function renderStats() {
     const d = state.data;
     const guilds = d.guilds.filter((g) => !g.legacy);
+    const live = onlinePlayers().length;
     const tiles = [
-      ['Players', d.players.length, 'with a Guildstone profile'],
+      ['Players', d.players.length, live ? `${live} gathering now` : 'with a Guildstone profile'],
       ['Active this week', d.players.filter(activeThisWeek).length, 'gathered in the last 7 days'],
       ['Guilds', guilds.length, `${sum(guilds.map((g) => g.memberCount))} members between them`],
       ['Suits worn', sum(d.players.map((p) => sum(p.suit))), 'suit tiers equipped right now'],
       ['Guild donations', fmt(sum(guilds.map((g) => g.points))), 'lifetime contribution points']
     ];
-    $('#lb-stats').replaceChildren(...tiles.map(([label, value, sub]) => el('div', { class: 'stat' }, el('span', { class: 'v' }, value), el('span', { class: 'l' }, label), el('span', { class: 's' }, sub))));
+    $('#lb-stats').replaceChildren(...tiles.map(([label, value, sub], i) => {
+      const node = el(i === 0 && live ? 'button' : 'div', { class: 'stat', onclick: i === 0 && live ? () => { location.hash = 'online'; } : null }, el('span', { class: 'v' }, value), el('span', { class: 'l' }, label), el('span', { class: 's' }, sub));
+      return node;
+    }));
+  }
+  function renderOnline() {
+    const root = $('#online-list');
+    const stats = $('#online-stats');
+    const tab = $('#tabs button[data-tab=online]');
+    const live = onlinePlayers();
+    if (tab) tab.textContent = live.length ? `Online · ${live.length}` : 'Online';
+    if (!root || !stats) return;
+    if (!state.data) {
+      stats.replaceChildren();
+      root.replaceChildren(el('div', { class: 'lb-status' }, el('span', { class: 'spin' }), 'Looking for gatherers…'));
+      return;
+    }
+    stats.replaceChildren(...[
+      el('div', { class: 'stat' }, el('span', { class: 'v' }, live.length), el('span', { class: 'l' }, 'Gathering now'), el('span', { class: 's' }, 'ring on, profession picked')),
+      ...PROF_IDS.map((pr) => {
+        const n = live.filter((p) => p.lastSkill === pr).length;
+        const info = PROFESSIONS[pr];
+        return el('div', { class: 'stat' },
+          el('span', { class: 'v', style: `color:${info.color}` }, n),
+          el('span', { class: 'l' }, info.zone),
+          el('span', { class: 's' }, n === 1 ? `1 ${VERB[pr].toLowerCase()}` : info.name)
+        );
+      })
+    ]);
+    if (!live.length) {
+      root.replaceChildren(el('div', { class: 'online-empty' },
+        el('span', { class: 'pulse' }),
+        el('h3', null, 'Nobody gathering right now'),
+        el('p', { class: 'muted' }, 'Wear the Guildstone Ring in Decentraland, pick a profession, and you land on this list within a minute.')
+      ));
+      return;
+    }
+    const card = (p, pr) => {
+      const info = pr ? PROFESSIONS[pr] : null;
+      const g = guildById(p.guild);
+      const lv = pr ? p.level[idx(pr)] : sum(p.level);
+      const suit = pr ? p.suit[idx(pr)] : 0;
+      return el('article', { class: 'oncard', style: `--accent:${info ? info.color : '#6bc74a'}` },
+        el('span', { class: 'pulse', title: 'Gathering now' }),
+        el('div', { class: 'on-who' },
+          el('strong', null, nameOf(p)),
+          g ? el('button', { class: 'gtag', style: `--h:${tagHue(g.tag)}`, title: g.name, onclick: () => openGuild(g.tag) }, g.tag) : null
+        ),
+        el('div', { class: 'on-do' }, info ? `${VERB[pr]} · ${info.name} Lv ${lv}${suit ? ` · L${suit} suit` : ''}` : 'Gathering'),
+        el('small', null, `claimed ${ago(p.workAt)}`)
+      );
+    };
+    const sections = PROF_IDS.map((pr) => {
+      const rows = live.filter((p) => p.lastSkill === pr);
+      if (!rows.length) return null;
+      const info = PROFESSIONS[pr];
+      return el('section', { class: 'group', style: `--accent:${info.color}` },
+        el('div', { class: 'group-head' },
+          el('h2', null, el('img', { src: info.icon, alt: '', class: 'gh-icon' }), info.zone),
+          el('p', null, `${rows.length} ${VERB[pr].toLowerCase()}`)
+        ),
+        el('div', { class: 'online-grid' }, ...rows.map((p) => card(p, pr)))
+      );
+    }).filter(Boolean);
+    const stray = live.filter((p) => !PROF_IDS.includes(p.lastSkill));
+    if (stray.length) {
+      sections.push(el('section', { class: 'group', style: '--accent:#6bc74a' },
+        el('div', { class: 'group-head' }, el('h2', null, 'Gathering'), el('p', null, 'Profession not reported')),
+        el('div', { class: 'online-grid' }, ...stray.map((p) => card(p, null)))
+      ));
+    }
+    root.replaceChildren(...sections);
   }
   function renderGuilds() {
     const root = $('#guild-list');
@@ -375,6 +457,7 @@ const Guilds = (() => {
   function init() {
     loadBaseline();
     $('#board-search').addEventListener('input', (e) => { state.query = e.target.value; renderBoard(); });
+    renderOnline();
     load();
   }
 
