@@ -96,11 +96,13 @@ MATERIALS.coin = { id: 'coin', name: 'Coins', kind: 'currency', tier: 'T0', gate
 const SUIT_COLLECTION = 'urn:decentraland:matic:collections-v2:0xf676c2e2768f415a10fa1703a5100141084f63b5';
 const ASSASSIN_COLLECTION = 'urn:decentraland:matic:collections-v2:0x0bf152a83a6fc55066c2b664b164ca2916ad38f5';
 const SUIT_IDS = { butcher: [0, 3, 6, 9], lumberjack: [1, 4, 7, 10], miner: [2, 5, 8, 11] };
+// Cheapest first: the set has no fixed order (suit level = pieces worn), so list the way a player should buy.
+// [itemId, name, rarity, marketplace list price in MANA (2026-10-14)]
 const ASSASSIN_PIECES = [
-  [0, 'Ether Assassin Boots', 'Exotic'],
-  [1, 'Ether Assassin Gloves', 'Rare'],
-  [3, 'Ether Assassin Pants', 'Legendary'],
-  [2, 'Ether Assassin Armor', 'Epic']
+  [1, 'Ether Assassin Gloves', 'Rare', 3],
+  [2, 'Ether Assassin Armor', 'Epic', 6.5],
+  [3, 'Ether Assassin Pants', 'Legendary', 19],
+  [0, 'Ether Assassin Boots', 'Exotic', 37.5]
 ];
 const thumb = (urn) => `https://peer.decentraland.org/lambdas/collections/contents/${urn}/thumbnail`;
 // Suits do not multiply yield. They are keys: wearing tier N unlocks the tier N+1 drop.
@@ -142,14 +144,18 @@ for (const p of PROF_IDS) {
   for (let level = 1; level <= 4; level++) {
     const urn = p === 'assassin' ? `${ASSASSIN_COLLECTION}:${ASSASSIN_PIECES[level - 1][0]}` : `${SUIT_COLLECTION}:${SUIT_IDS[p][level - 1]}`;
     // Assassin pieces are sold in the Marketplace, never crafted. Wearing them still gates the Skeleton Yard tiers.
-    const r = p === 'assassin'
-      ? { cost: [], requires: ['Buy it in the Decentraland Marketplace'], buy: `https://decentraland.org/marketplace/contracts/${ASSASSIN_COLLECTION.split(':').pop()}/items/${ASSASSIN_PIECES[level - 1][0]}` }
+    const piece = p === 'assassin' ? ASSASSIN_PIECES[level - 1] : null;
+    const r = piece
+      ? { cost: [], requires: [`Buy it in the Decentraland Marketplace (${piece[3]} MANA list price)`, level === 1 ? 'Start here: the cheapest piece' : `Any ${level} pieces of the set count as L${level}`], buy: `https://decentraland.org/marketplace/contracts/${ASSASSIN_COLLECTION.split(':').pop()}/items/${piece[0]}` }
       : suitRecipe(p, level);
-    const name = p === 'assassin' ? ASSASSIN_PIECES[level - 1][1] : `${PROFESSIONS[p].name} L${level}`;
+    const name = piece ? piece[1] : `${PROFESSIONS[p].name} L${level}`;
     WEARABLES.push({
-      id: `${p}_l${level}`, name, group: p, level, rarity: p === 'assassin' ? ASSASSIN_PIECES[level - 1][2] : ['Uncommon', 'Rare', 'Epic', 'Legendary'][level - 1],
-      collection: p === 'assassin' ? 'Ether Assassin set' : 'Antrom Profession Suits', img: thumb(urn), urn,
-      effect: `Wear it and ${LADDER[p][level][1]} starts dropping in the ${PROFESSIONS[p].zone}. Also carry ${SUIT_BAG[level]} more.`,
+      id: `${p}_l${level}`, name, group: p, level, rarity: piece ? piece[2] : ['Uncommon', 'Rare', 'Epic', 'Legendary'][level - 1],
+      collection: piece ? 'Ether Assassin set' : 'Antrom Profession Suits', img: thumb(urn), urn,
+      // The Assassin set has no order: wearing any N pieces is suit level N.
+      effect: piece
+        ? `Wear any ${level} piece${level > 1 ? 's' : ''} of the set and ${LADDER[p][level][1]} starts dropping in the ${PROFESSIONS[p].zone}. Also carry ${SUIT_BAG[level]} more.`
+        : `Wear it and ${LADDER[p][level][1]} starts dropping in the ${PROFESSIONS[p].zone}. Also carry ${SUIT_BAG[level]} more.`,
       ...r
     });
   }
