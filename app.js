@@ -34,6 +34,7 @@ function showTab(id, push = true, scrollTop = true) {
   if (push && location.hash !== `#${id}`) history.replaceState(null, '', id === 'wearables' ? location.pathname : `#${id}`);
   if (scrollTop) window.scrollTo({ top: 0 });
   Guilds.setVisible(id === 'guilds' || id === 'online');
+  Chat.setVisible(id === 'online');
 }
 $('#tabs').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-tab]');
@@ -244,6 +245,48 @@ function renderZones() {
   $('#hero-cta').addEventListener('click', () => showTab('how'));
 }
 
+/* Assassin mints are USD-pegged: API `price` is dollars in wei, shop charges that in MANA at the live rate. */
+async function refreshAssassinPrices() {
+  const contract = ASSASSIN_CONTRACT || ASSASSIN_COLLECTION.split(':').pop();
+  let usdByItem = {};
+  try {
+    const res = await fetch(`https://marketplace-api.decentraland.org/v1/items?contractAddress=${contract}`);
+    if (res.ok) {
+      const body = await res.json();
+      for (const item of body.data || []) {
+        const usd = Number((Number(item.price) / 1e18).toPrecision(8));
+        if (Number.isFinite(usd) && usd > 0) usdByItem[String(item.itemId)] = usd;
+      }
+    }
+  } catch { /* keep fallbacks */ }
+  let usdPerMana = 0;
+  for (const [url, read] of [
+    ['https://api.coingecko.com/api/v3/simple/price?ids=decentraland&vs_currencies=usd', (j) => Number(j.decentraland && j.decentraland.usd)],
+    ['https://api.binance.com/api/v3/ticker/price?symbol=MANAUSDT', (j) => Number(j.price)]
+  ]) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const n = read(await res.json());
+      if (Number.isFinite(n) && n > 0) { usdPerMana = n; break; }
+    } catch { /* try the next source */ }
+  }
+  let changed = false;
+  for (const w of WEARABLES) {
+    if (w.group !== 'assassin' || w.itemId === undefined) continue;
+    const usd = usdByItem[String(w.itemId)] ?? w.usd;
+    const mana = usdPerMana > 0 ? usd / usdPerMana : 0;
+    const line = assassinBuyLine(usd, mana);
+    if (w.requires[0] !== line) {
+      w.requires[0] = line;
+      w.usd = usd;
+      w.mana = mana;
+      changed = true;
+    }
+  }
+  if (changed) renderWearables();
+}
+
 /* ---------- Go ---------- */
 renderWearableFilters();
 renderWearables();
@@ -251,4 +294,6 @@ renderMaterialFilters();
 renderMaterials();
 renderZones();
 Guilds.init();
+Chat.init();
 routeFromHash();
+refreshAssassinPrices();

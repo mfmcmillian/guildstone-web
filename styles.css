@@ -346,6 +346,33 @@ button.grow:hover, .grow.open { transform: translateY(-2px); border-color: hsl(v
 .online-empty h3 { font-size: 20px; color: var(--gold); }
 .online-empty .pulse { width: 12px; height: 12px; border-radius: 50%; background: var(--muted); animation: none; }
 
+/* Guild Lobby (website side of the in-game chat) */
+.lobby { margin-bottom: 36px; }
+.chat { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); overflow: hidden; }
+.chat-log { height: 380px; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; scroll-behavior: smooth; }
+.chat-empty { margin: auto; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+.cday { align-self: center; margin: 10px 0 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.cline { display: grid; grid-template-columns: auto auto 1fr; align-items: baseline; gap: 10px; padding: 5px 8px; border-radius: 8px; }
+.cline:hover { background: var(--panel2); }
+.cline.mine { background: color-mix(in srgb, var(--amethyst) 12%, transparent); }
+.cline time { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.cwho { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.cline.web .cwho strong { color: var(--muted); }
+.ctag { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; padding: 1px 6px; border-radius: 5px; color: hsl(var(--h, 270) 90% 85%); background: hsl(var(--h, 270) 45% 24%); border: 1px solid hsl(var(--h, 270) 50% 36%); }
+.ctag.web { color: var(--muted); background: transparent; border: 1px dashed var(--line); }
+.ctext { overflow-wrap: anywhere; line-height: 1.45; }
+.chat-form { display: grid; grid-template-columns: 150px 1fr auto; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); background: var(--bg2); }
+.chat-form input { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; min-width: 0; outline: none; }
+.chat-form input:focus { border-color: var(--amethyst); box-shadow: 0 0 0 3px rgba(162, 89, 255, 0.2); }
+.chat-form input::placeholder { color: var(--muted); }
+.chat-form input:disabled { opacity: 0.6; }
+.chat-form .btn { padding: 9px 18px; }
+.chat-form .btn:disabled { opacity: 0.5; cursor: default; }
+.chat-note { min-height: 18px; padding: 0 16px 8px; font-size: 12px; color: var(--muted); background: var(--bg2); }
+.chat-note:empty { padding: 0; min-height: 0; }
+.chat-note.err { color: #ff7b7b; }
+.chat-note.warn { color: var(--gold); }
+
 /* ---------- Footer ---------- */
 .foot {
   max-width: 1280px; margin: 0 auto; padding: 22px 28px 40px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
@@ -395,6 +422,11 @@ button.grow:hover, .grow.open { transform: translateY(-2px); border-color: hsl(v
   .board { min-width: 640px; }
 }
 @media (max-width: 720px) {
+  .chat-form { grid-template-columns: 1fr auto; }
+  .chat-form #chat-name { grid-column: 1 / -1; }
+  .chat-log { height: 320px; }
+  .cline { grid-template-columns: auto 1fr; }
+  .cline .ctext { grid-column: 1 / -1; }
   .grid.feature .card { flex-direction: column; }
   .grid.feature .card .art { width: 100%; flex: none; }
   .pairs { grid-template-columns: 1fr; }

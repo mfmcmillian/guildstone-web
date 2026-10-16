@@ -97,13 +97,26 @@ const SUIT_COLLECTION = 'urn:decentraland:matic:collections-v2:0xf676c2e2768f415
 const ASSASSIN_COLLECTION = 'urn:decentraland:matic:collections-v2:0x0bf152a83a6fc55066c2b664b164ca2916ad38f5';
 const SUIT_IDS = { butcher: [0, 3, 6, 9], lumberjack: [1, 4, 7, 10], miner: [2, 5, 8, 11] };
 // Cheapest first: the set has no fixed order (suit level = pieces worn), so list the way a player should buy.
-// [itemId, name, rarity, marketplace list price in MANA (2026-10-14)]
+// [itemId, name, rarity, USD mint price]. Marketplace stores USD-wei and charges MANA at the live rate.
+const ASSASSIN_CONTRACT = '0x0bf152a83a6fc55066c2b664b164ca2916ad38f5';
 const ASSASSIN_PIECES = [
   [1, 'Ether Assassin Gloves', 'Rare', 3],
   [2, 'Ether Assassin Armor', 'Epic', 6.5],
   [3, 'Ether Assassin Pants', 'Legendary', 19],
   [0, 'Ether Assassin Boots', 'Exotic', 37.5]
 ];
+function assassinBuyLine(usd, mana = 0) {
+  const dollars = Number(usd);
+  const usdText = Number.isFinite(dollars)
+    ? (Number.isInteger(dollars) ? `$${dollars}` : `$${dollars.toFixed(2)}`)
+    : `$${usd}`;
+  const paid = Number(mana);
+  if (paid > 0 && Number.isFinite(paid)) {
+    const manaText = paid >= 10 ? String(Math.round(paid)) : paid.toFixed(1);
+    return `Buy it in the Decentraland Marketplace (~${manaText} MANA · ${usdText})`;
+  }
+  return `Buy it in the Decentraland Marketplace (${usdText}, paid in MANA)`;
+}
 const thumb = (urn) => `https://peer.decentraland.org/lambdas/collections/contents/${urn}/thumbnail`;
 // Suits do not multiply yield. They are keys: wearing tier N unlocks the tier N+1 drop.
 const SUIT_BAG = [200, 500, 1000, 2000, 4000];
@@ -146,7 +159,7 @@ for (const p of PROF_IDS) {
     // Assassin pieces are sold in the Marketplace, never crafted. Wearing them still gates the Skeleton Yard tiers.
     const piece = p === 'assassin' ? ASSASSIN_PIECES[level - 1] : null;
     const r = piece
-      ? { cost: [], requires: [`Buy it in the Decentraland Marketplace (${piece[3]} MANA list price)`, level === 1 ? 'Start here: the cheapest piece' : `Any ${level} pieces of the set count as L${level}`], buy: `https://decentraland.org/marketplace/contracts/${ASSASSIN_COLLECTION.split(':').pop()}/items/${piece[0]}` }
+      ? { cost: [], itemId: piece[0], usd: piece[3], requires: [assassinBuyLine(piece[3]), level === 1 ? 'Start here: the cheapest piece' : `Any ${level} pieces of the set count as L${level}`], buy: `https://decentraland.org/marketplace/contracts/${ASSASSIN_COLLECTION.split(':').pop()}/items/${piece[0]}` }
       : suitRecipe(p, level);
     const name = piece ? piece[1] : `${PROFESSIONS[p].name} L${level}`;
     WEARABLES.push({
@@ -172,7 +185,7 @@ for (const p of PROF_IDS) {
 }
 WEARABLES.push({
   id: 'guildstone_crown', name: 'Guildstone Crown', group: 'crown', rarity: 'Unique', collection: 'Antrom Relics (planned)', slot: 'Head', planned: true,
-  img: 'img/item_guildstone_crown.jpg', effect: 'The last thing in the game to craft. Very few will ever exist, and the leaderboard shows who has one.',
+  img: 'img/item_guildstone_crown.jpg', effect: 'The last thing in the game to craft. Only one will ever exist, and the leaderboard shows who has it.',
   cost: [['guildstone_shard', 50], ['antrom_essence', 150], ['coin', 1000000]], relics: true,
   requires: ['Own all four Relics', 'All four professions at L4'], drives: 'The last thing anyone crafts'
 });
