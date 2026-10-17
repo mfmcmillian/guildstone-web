@@ -159,7 +159,7 @@ for (const p of PROF_IDS) {
     // Assassin pieces are sold in the Marketplace, never crafted. Wearing them still gates the Skeleton Yard tiers.
     const piece = p === 'assassin' ? ASSASSIN_PIECES[level - 1] : null;
     const r = piece
-      ? { cost: [], itemId: piece[0], usd: piece[3], requires: [assassinBuyLine(piece[3]), level === 1 ? 'Start here: the cheapest piece' : `Any ${level} pieces of the set count as L${level}`], buy: `https://decentraland.org/marketplace/contracts/${ASSASSIN_COLLECTION.split(':').pop()}/items/${piece[0]}` }
+      ? { cost: [], itemId: piece[0], usd: piece[3], requires: [assassinBuyLine(piece[3]), level === 1 ? 'Start here: the cheapest piece' : `Any ${level} pieces of the set count as L${level}`, ...(level === 1 ? ['Also free: beat the Dweller in Antrom (the first cave clear mints them)'] : [])], buy: `https://decentraland.org/marketplace/contracts/${ASSASSIN_COLLECTION.split(':').pop()}/items/${piece[0]}` }
       : suitRecipe(p, level);
     const name = piece ? piece[1] : `${PROFESSIONS[p].name} L${level}`;
     WEARABLES.push({
