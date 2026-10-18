@@ -25,7 +25,7 @@ const GROUPS = [
 ];
 
 /* ---------- Tabs (hash-routed so sections can be linked) ---------- */
-const TAB_IDS = ['wearables', 'materials', 'guilds', 'online', 'storm', 'how'];
+const TAB_IDS = ['wearables', 'materials', 'guilds', 'online', 'storm', 'how', 'ring'];
 function showTab(id, push = true, scrollTop = true) {
   if (!TAB_IDS.includes(id)) id = 'wearables';
   for (const x of $('#tabs').children) x.classList.toggle('active', x.dataset.tab === id);
@@ -287,6 +287,90 @@ async function refreshAssassinPrices() {
   if (changed) renderWearables();
 }
 
+/* ---------- Free Ring: claim form + Matt's hero stage ---------- */
+const Ring = (() => {
+  const API = localStorage.getItem('guildstone.api') || 'https://dcl-firebase-backend.vercel.app';
+  const HEROES = ['assassin', 'knight', 'warlock'];
+  const SHEET = { assassin: 'img/raid/assassin_v2.png', knight: 'img/raid/knight_v1.png', warlock: 'img/raid/warlock_v1.png' };
+  const STAGE = { assassin: 'img/raid/hero_stage_assassin_v1.jpg', knight: 'img/raid/hero_stage_knight_v1.jpg', warlock: 'img/raid/hero_stage_warlock_v1.jpg' };
+  const IDLE_FRAMES = 4; // row 0 of the 6 x 5 sheet, 144 px cells
+  const HERO_MS = 4000;
+  const FRAME_MS = 220;
+
+  function stage() {
+    const box = $('#ring-stage');
+    const hero = $('#ring-hero');
+    if (!box || !hero) return;
+    for (const h of HEROES) { new Image().src = SHEET[h]; new Image().src = STAGE[h]; }
+    let i = 0;
+    const show = (h) => {
+      box.style.backgroundImage = `url(${STAGE[h]})`;
+      hero.style.backgroundImage = `url(${SHEET[h]})`;
+    };
+    show(HEROES[0]);
+    setInterval(() => {
+      // Only step while the tab is on screen; a hidden tab keeps its timers but nobody is watching.
+      if (document.body.dataset.tab !== 'ring') return;
+      const frame = Math.floor(Date.now() / FRAME_MS) % IDLE_FRAMES;
+      hero.style.backgroundPosition = `${-144 * frame}px 0`;
+    }, FRAME_MS / 2);
+    setInterval(() => {
+      if (document.body.dataset.tab !== 'ring') return;
+      hero.classList.add('swap');
+      setTimeout(() => { i = (i + 1) % HEROES.length; show(HEROES[i]); hero.classList.remove('swap'); }, 400);
+    }, HERO_MS);
+  }
+
+  function links() {
+    fetch(`${API}/antrom-afk/config`).then((r) => r.json()).then((c) => {
+      const d = c && c.links && typeof c.links.discord === 'string' ? c.links.discord : '';
+      const a = $('#ring-discord');
+      if (a && d) { a.href = d; a.hidden = false; }
+    }).catch(() => {});
+  }
+
+  function claim() {
+    const form = $('#ring-form');
+    const input = $('#ring-address');
+    const button = $('#ring-submit');
+    const status = $('#ring-status');
+    const connect = $('#ring-connect');
+    if (!form) return;
+    const say = (text, cls = '') => { status.textContent = text; status.className = `ring-status ${cls}`.trim(); };
+    // A browser wallet makes it one click: read the address instead of asking them to paste it.
+    if (window.ethereum && typeof window.ethereum.request === 'function') {
+      connect.hidden = false;
+      connect.addEventListener('click', async () => {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          if (accounts && accounts[0]) { input.value = accounts[0]; say(''); }
+        } catch { say('Wallet did not connect. You can paste the address instead.', 'err'); }
+      });
+    }
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const address = input.value.trim().toLowerCase();
+      if (!/^0x[a-f0-9]{40}$/.test(address)) return say('That does not look like a wallet address (0x followed by 40 characters).', 'err');
+      button.disabled = true;
+      say('Asking the Rewards server…');
+      try {
+        const r = await fetch(`${API}/antrom-afk/ring/claim`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address }) });
+        const b = await r.json().catch(() => ({}));
+        if (!r.ok) return say(b.error || `Something went wrong (${r.status}). Try again in a minute.`, 'err');
+        if (b.already) return say('This wallet already has its Ring. Look in your Backpack in Decentraland (it can take a few minutes to arrive).', 'ok');
+        say('Done! Your Ring is on its way: open your Backpack in Decentraland in a minute or two, equip it, and welcome to Antrom.', 'ok');
+        localStorage.setItem('guildstone.ringClaimed', address);
+      } catch {
+        say('Could not reach the server. Check your connection and try again.', 'err');
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+
+  return { init() { stage(); links(); claim(); } };
+})();
+
 /* ---------- Go ---------- */
 renderWearableFilters();
 renderWearables();
@@ -296,5 +380,6 @@ renderZones();
 Guilds.init();
 Chat.init();
 Storm.init();
+Ring.init();
 routeFromHash();
 refreshAssassinPrices();
