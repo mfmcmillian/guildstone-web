@@ -122,6 +122,16 @@ const Guilds = (() => {
       id: 'donors', label: 'Guild donors', color: '#6bc74a', hint: 'Lifetime guild contribution points from HQ and tech donations, across every guild the player has donated to.',
       score: (p) => [p.donated, sum(p.level)], filter: (p) => p.donated > 0,
       cols: [{ h: 'Points', v: (p) => el('strong', null, fmt(p.donated)), cls: 'num' }]
+    },
+    {
+      id: 'raid', label: 'Valor', icon: 'img/raid/antrom_storm_v1.png', color: '#a259ff', hint: 'Lifetime Valor from Antrom Storms and Guild Wars: 1 a tick in the field, ×1.5 on the winning side, +5 a knockout. Ties go to wins, then knockouts.',
+      score: (p) => [p.raid?.valor || 0, p.raid?.wins || 0, p.raid?.kos || 0], filter: (p) => (p.raid?.valor || 0) > 0 || (p.raid?.raids || 0) > 0,
+      cols: [
+        { h: 'Valor', v: (p) => el('strong', null, fmt(p.raid?.valor)), cls: 'num' },
+        { h: 'Hero', v: (p) => (typeof Storm !== 'undefined' ? Storm.heroChip(p.hero, p.heroLevel) : `${p.hero} ${p.heroLevel}`) },
+        { h: 'Storms', v: (p) => `${p.raid?.raids || 0} · ${p.raid?.wins || 0}W` },
+        { h: 'Knockouts', v: (p) => p.raid?.kos || '—', cls: 'num' }
+      ]
     }
   ];
   const boardById = (id) => BOARDS.find((b) => b.id === id) || BOARDS[0];
@@ -191,6 +201,8 @@ const Guilds = (() => {
     renderBoardFilters();
     renderBoard();
     renderOnline();
+    // Other modules (storm.js) draw from the same payload.
+    document.dispatchEvent(new CustomEvent('guildstone:data', { detail: state.data }));
   }
   function stamp(box) {
     if (!box) return;
@@ -461,5 +473,6 @@ const Guilds = (() => {
     load();
   }
 
-  return { init, setVisible, showBoard, openGuild, onDetailClosed };
+  const getData = () => state.data;
+  return { init, setVisible, showBoard, openGuild, onDetailClosed, getData, tagHue, nameOf, guildById };
 })();

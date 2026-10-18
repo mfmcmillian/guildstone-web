@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=5" />
 </head>
 <body>
   <header class="top">
@@ -30,6 +30,7 @@
       <button data-tab="materials">Materials</button>
       <button data-tab="guilds">Guilds</button>
       <button data-tab="online">Online</button>
+      <button data-tab="storm">Storm</button>
       <button data-tab="how">How to play</button>
     </nav>
   </header>
@@ -44,6 +45,7 @@
         <button class="btn primary" id="hero-cta">How to play</button>
         <a class="btn ghost" href="#guilds">Guilds &amp; leaderboards</a>
         <a class="btn ghost" href="#online">Who's online</a>
+        <a class="btn ghost" href="#storm">Antrom Storm</a>
         <a class="btn ghost" href="#suits">Browse the suits</a>
       </div>
     </div>
@@ -139,6 +141,60 @@
       <div id="online-list"></div>
     </section>
 
+    <section id="tab-storm" class="tab">
+      <div class="storm-hero">
+        <img class="storm-logo" src="img/raid/antrom_storm_v1.png" alt="Antrom Storm" />
+        <p class="storm-tag">Four minutes. Five buildings. Whoever holds more when the bell rings, wins.</p>
+        <p class="storm-sub">Every day, any guild member can ring the bell on the WAR tab. Whoever shows up is dealt into Team Dusk and Team Dawn. Wednesdays at 9 PM ET it's guild against guild.</p>
+      </div>
+
+      <div class="stats" id="storm-stats"></div>
+
+      <section class="group" id="storm-field" style="--accent:#a259ff">
+        <div class="group-head">
+          <h2>The field</h2>
+          <p>Stand in a building alone for 6 seconds and its flag is yours. A flag pays every 3 seconds until the other side takes it back.</p>
+        </div>
+        <div class="field-wrap">
+          <div class="field" id="field"></div>
+          <div class="field-side" id="field-rules"></div>
+        </div>
+      </section>
+
+      <section class="group" id="storm-how" style="--accent:#ffd23f">
+        <div class="group-head">
+          <h2>How a Storm goes</h2>
+          <p>Nothing to build and nothing to lose. Your fighter is you.</p>
+        </div>
+        <div class="how-grid" id="storm-steps"></div>
+      </section>
+
+      <section class="group" id="storm-heroes" style="--accent:#ff63e1">
+        <div class="group-head">
+          <h2>Heroes</h2>
+          <p>Three fighters, one of them yours in the field. Level them with base materials from the HERO window. Each one beats one of the others.</p>
+        </div>
+        <div class="hero-grid" id="hero-grid"></div>
+        <div class="formula" id="hero-formula"></div>
+      </section>
+
+      <section class="group" id="storm-war" style="--accent:#6bc74a">
+        <div class="group-head">
+          <h2>Guild War · Wednesdays 9 PM ET</h2>
+          <p>Four a side, guild against guild, for the resource payout and the record.</p>
+        </div>
+        <div class="how-grid" id="war-steps"></div>
+      </section>
+
+      <section class="group" id="storm-board" style="--accent:#a259ff">
+        <div class="group-head">
+          <h2>Valor</h2>
+          <p>Lifetime Valor from ranked Storms and Guild Wars. The first five Storms you join each day are ranked.</p>
+        </div>
+        <div id="storm-top"></div>
+      </section>
+    </section>
+
     <section id="tab-how" class="tab">
       <div class="section-head">
         <h2>How to play</h2>
@@ -180,6 +236,7 @@
       <a href="#materials">Materials</a>
       <a href="#guilds">Guilds</a>
       <a href="#online">Online</a>
+      <a href="#storm">Storm</a>
       <a href="#how">How to play</a>
       <a href="https://decentraland.org/marketplace/" target="_blank" rel="noopener">Marketplace</a>
     </div>
@@ -188,9 +245,10 @@
   <aside id="detail" class="detail hidden" aria-live="polite"></aside>
   <div id="scrim" class="scrim hidden"></div>
 
-  <script src="data.js?v=4"></script>
-  <script src="guilds.js?v=4"></script>
-  <script src="chat.js?v=4"></script>
-  <script src="app.js?v=4"></script>
+  <script src="data.js?v=5"></script>
+  <script src="guilds.js?v=5"></script>
+  <script src="chat.js?v=5"></script>
+  <script src="storm.js?v=5"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
