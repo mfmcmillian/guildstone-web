@@ -290,35 +290,24 @@ async function refreshAssassinPrices() {
 /* ---------- Free Ring: claim form + Matt's hero stage ---------- */
 const Ring = (() => {
   const API = localStorage.getItem('guildstone.api') || 'https://dcl-firebase-backend.vercel.app';
-  const HEROES = ['assassin', 'knight', 'warlock'];
-  const SHEET = { assassin: 'img/raid/assassin_v2.png', knight: 'img/raid/knight_v1.png', warlock: 'img/raid/warlock_v1.png' };
-  const STAGE = { assassin: 'img/raid/hero_stage_assassin_v1.jpg', knight: 'img/raid/hero_stage_knight_v1.jpg', warlock: 'img/raid/hero_stage_warlock_v1.jpg' };
-  const IDLE_FRAMES = 4; // row 0 of the 6 x 5 sheet, 144 px cells
-  const HERO_MS = 4000;
-  const FRAME_MS = 220;
+  // Matt's picture: the Knight idling in his yard. Sheet is 6 x 5 cells of 144 px, idle on row 0 (4 frames).
+  const SHEET = 'img/raid/knight_v1.png';
+  const STAGE = 'img/raid/hero_stage_knight_v1.jpg';
+  const IDLE_FRAMES = 4;
+  const FRAME_MS = 260;
 
   function stage() {
     const box = $('#ring-stage');
     const hero = $('#ring-hero');
     if (!box || !hero) return;
-    for (const h of HEROES) { new Image().src = SHEET[h]; new Image().src = STAGE[h]; }
-    let i = 0;
-    const show = (h) => {
-      box.style.backgroundImage = `url(${STAGE[h]})`;
-      hero.style.backgroundImage = `url(${SHEET[h]})`;
-    };
-    show(HEROES[0]);
+    box.style.backgroundImage = `url(${STAGE})`;
+    hero.style.backgroundImage = `url(${SHEET})`;
     setInterval(() => {
       // Only step while the tab is on screen; a hidden tab keeps its timers but nobody is watching.
       if (document.body.dataset.tab !== 'ring') return;
       const frame = Math.floor(Date.now() / FRAME_MS) % IDLE_FRAMES;
       hero.style.backgroundPosition = `${-144 * frame}px 0`;
     }, FRAME_MS / 2);
-    setInterval(() => {
-      if (document.body.dataset.tab !== 'ring') return;
-      hero.classList.add('swap');
-      setTimeout(() => { i = (i + 1) % HEROES.length; show(HEROES[i]); hero.classList.remove('swap'); }, 400);
-    }, HERO_MS);
   }
 
   function links() {
