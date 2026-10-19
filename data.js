@@ -119,7 +119,7 @@ function assassinBuyLine(usd, mana = 0) {
 }
 const thumb = (urn) => `https://peer.decentraland.org/lambdas/collections/contents/${urn}/thumbnail`;
 // Suits do not multiply yield. They are keys: wearing tier N unlocks the tier N+1 drop.
-const SUIT_BAG = [200, 500, 1000, 2000, 4000];
+const SUIT_BAG = [500, 500, 1000, 2000, 4000];
 
 function ref(p, t) { return LADDER[p][t][2]; }
 
