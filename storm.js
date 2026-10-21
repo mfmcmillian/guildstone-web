@@ -62,7 +62,7 @@ const Storm = (() => {
         el('dt', null, 'Taking a flag'), el('dd', null, `Stand there with no enemy for ${RULES.captureTicks} ticks and it flips. A defender walking in resets you. Both sides inside: nobody is paid.`),
         el('dt', null, 'Holding one'), el('dd', null, `A flag pays its pips every tick whether anyone is home or not, so a pair can own three or four buildings. Up to ${maxTick} a tick, ${maxTick * RULES.ticks} for a perfect Storm.`),
         el('dt', null, 'Building bonus'), el('dd', null, 'The side whose flag is on the building fights better inside it: Sawmill and Quarry cut the damage you take by 15%, Watchtower and Bone Shrine raise the damage you deal by 15%. Attackers get nothing. The Citadel has no bonus; it is worth double instead.'),
-        el('dt', null, 'Knocked out'), el('dd', null, `HP at 0 and you are carried back to camp over ${secs(RULES.koWalkMs)}, revive at full and walk straight back to your last building. Retreating to camp to heal is cheaper than dying.`),
+        el('dt', null, 'Knocked out'), el('dd', null, `HP at 0 and you are carried back to camp over ${secs(RULES.koWalkMs)}, revive at full and walk straight back to your last building. Walking home instead heals you 25% of max HP a tick, empty to full in four ticks, so retreating to heal is cheaper than dying.`),
         el('dt', null, 'Walking'), el('dd', null, `Camp to Citadel is ${secs(RULES.walkMs)}; near corners about 3 s, far ones 12–15 s. You can't be hit on the road and you score nothing there.`)
       )
     );
