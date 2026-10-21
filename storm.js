@@ -8,11 +8,11 @@ const Storm = (() => {
   // Server defaults. The dashboard can retune them live; the text here is the design, not a contract.
   const RULES = { tickMs: 3000, ticks: 80, gatherMs: 120000, walkMs: 7500, koWalkMs: 20000, sideMax: 4, raidsPerDay: 5, captureTicks: 2, valorPerTick: 1, valorPerKo: 5, valorWinMult: 1.5 };
   const POINTS = [
-    { id: 'watchtower', name: 'Watchtower', pips: 1, armour: 15, x: 34, y: 21 },
-    { id: 'sawmill', name: 'Sawmill', pips: 1, armour: 15, x: 68, y: 19 },
-    { id: 'citadel', name: 'Citadel', pips: 2, armour: 30, x: 51, y: 44 },
-    { id: 'quarry', name: 'Quarry', pips: 1, armour: 15, x: 30, y: 74 },
-    { id: 'shrine', name: 'Bone Shrine', pips: 1, armour: 15, x: 70, y: 71 }
+    { id: 'watchtower', name: 'Watchtower', pips: 1, armour: 0, attack: 15, x: 34, y: 21 },
+    { id: 'sawmill', name: 'Sawmill', pips: 1, armour: 15, attack: 0, x: 68, y: 19 },
+    { id: 'citadel', name: 'Citadel', pips: 2, armour: 0, attack: 0, x: 51, y: 44 },
+    { id: 'quarry', name: 'Quarry', pips: 1, armour: 15, attack: 0, x: 30, y: 74 },
+    { id: 'shrine', name: 'Bone Shrine', pips: 1, armour: 0, attack: 15, x: 70, y: 71 }
   ];
   const HERO_IDS = ['assassin', 'knight', 'warlock'];
   const HEROES = {
@@ -53,7 +53,7 @@ const Storm = (() => {
       el('span', { class: 'camp dusk', style: 'left:8%;top:52%' }, 'Team Dusk'),
       el('span', { class: 'camp dawn', style: 'left:92%;top:52%' }, 'Team Dawn'),
       ...POINTS.map((p) => el('span', { class: `pt${p.pips > 1 ? ' big' : ''}`, style: `left:${p.x}%;top:${p.y}%` },
-        el('b', null, p.name), el('small', null, `+${p.pips} · ${p.armour}% armour`)))
+        el('b', null, p.name), el('small', null, `+${p.pips}${p.armour ? ` · ${p.armour}% armour` : p.attack ? ` · ${p.attack}% attack` : ''}`)))
     );
     const maxTick = POINTS.reduce((a, p) => a + p.pips, 0);
     $('#field-rules').replaceChildren(
@@ -61,7 +61,7 @@ const Storm = (() => {
         el('dt', null, 'A tick'), el('dd', null, `Every ${secs(RULES.tickMs)}: arrivals land, buildings with both sides inside trade damage, flags pay out. ${RULES.ticks} ticks to a Storm, ${mins(RULES.tickMs * RULES.ticks)} in all.`),
         el('dt', null, 'Taking a flag'), el('dd', null, `Stand there with no enemy for ${RULES.captureTicks} ticks and it flips. A defender walking in resets you. Both sides inside: nobody is paid.`),
         el('dt', null, 'Holding one'), el('dd', null, `A flag pays its pips every tick whether anyone is home or not, so a pair can own three or four buildings. Up to ${maxTick} a tick, ${maxTick * RULES.ticks} for a perfect Storm.`),
-        el('dt', null, 'Armour'), el('dd', null, 'The side whose flag is on the building takes less damage inside it. Attackers take it all. The Citadel is worth double and cuts 30%.'),
+        el('dt', null, 'Building bonus'), el('dd', null, 'The side whose flag is on the building fights better inside it: Sawmill and Quarry cut the damage you take by 15%, Watchtower and Bone Shrine raise the damage you deal by 15%. Attackers get nothing. The Citadel has no bonus; it is worth double instead.'),
         el('dt', null, 'Knocked out'), el('dd', null, `HP at 0 and you are carried back to camp over ${secs(RULES.koWalkMs)}, revive at full and walk straight back to your last building. Retreating to camp to heal is cheaper than dying.`),
         el('dt', null, 'Walking'), el('dd', null, `Camp to Citadel is ${secs(RULES.walkMs)}; near corners about 3 s, far ones 12–15 s. You can't be hit on the road and you score nothing there.`)
       )
