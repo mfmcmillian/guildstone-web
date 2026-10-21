@@ -73,7 +73,7 @@ const Storm = (() => {
       ['Ring the bell', `Any guild member opens the WAR tab and taps <strong>ENTER THE STORM</strong>. If none is gathering that opens one; everyone in the lobby hears the bell and has ${mins(RULES.gatherMs)} to join. One Storm at a time, server-wide.`],
       ['Teams are drawn', `At the bell the list is shuffled into <strong>Team Dusk</strong> and <strong>Team Dawn</strong>, up to ${RULES.sideMax} a side. Alone? You fight a Wraith copy of yourself. Odd count? One Wraith pads the short side.`],
       ['Click a building', 'The building is the button. Walk, arrive, hold. Click another to move, or BACK TO CAMP to heal. Your fighter is you: HP and ATK come from your Assassin level, dagger, suit pieces, VIP tier and hero.'],
-      ['Most flags wins', `When the ${RULES.ticks} ticks run out the higher score takes it. Everyone earns Valor: ${RULES.valorPerTick} a tick in the Storm, ×${RULES.valorWinMult} on the winning side, +${RULES.valorPerKo} a knockout.`],
+      ['Most flags wins', `When the ${RULES.ticks} ticks run out the higher score takes it. Everyone earns Valor: ${RULES.valorPerTick} a tick in the Storm, ×${RULES.valorWinMult} on the winning side, +${RULES.valorPerKo} a knockout. Ranked Storms also pay into the bank: the winning side 100 wood, 100 rock, 50 meat and 50 bone each, the other side half.`],
       ['Fight all day', `Your first ${RULES.raidsPerDay} Storms each day are ranked and pay Valor. After that you can keep fighting for the record (wins, Storms, knockouts) but the Valor is spent.`]
     ];
     $('#storm-steps').replaceChildren(...steps.map(([h, p], i) => {
@@ -85,7 +85,7 @@ const Storm = (() => {
       ['Sign up by Tuesday', 'The guild leader taps SIGN UP on the Guild Battle card any time from the previous Wednesday night until Tuesday 11:59 PM ET. WITHDRAW until then.'],
       ['Get paired', 'Once sign-ups close, guilds are paired in sign-up order. The card shows your matchup for the week; an odd guild out sits that one with a bye.'],
       ['Field four', 'Wednesday 9–11 PM ET, members tap JOIN like any Storm. The moment both guilds have four, the start pulls in to one minute. A side that can\u2019t field four by 11 PM forfeits and nothing is paid.'],
-      ['Take the payout', 'Winners each get 300 wood, 300 rock, 150 meat and 150 bone; losers half. Guild points are Valor ×3 and the match goes on the guild\u2019s record. No Wraiths, no daily cap, always ranked.']
+      ['Take the payout', 'Everyone who fights banks 1,500 wood, 1,500 rock, 750 meat and 750 bone; the top guild’s fighters bank 3,000 wood, 3,000 rock, 1,500 meat and 1,500 bone on top. Bring friends: a tile with five fighters captures in a fraction of the time one takes. Guild points are Valor ×3 and the match goes on the guild\u2019s record. No Wraiths, no daily cap, always ranked.']
     ];
     $('#war-steps').replaceChildren(...war.map(([h, p], i) => el('article', { class: 'rule' }, el('span', { class: 'step' }, i + 1), el('h3', null, h), el('p', null, p))));
   }
