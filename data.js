@@ -12,7 +12,7 @@ const PROF_IDS = Object.keys(PROFESSIONS);
 /* Tier gates and drop rates (1 in N gather cycles; a cycle is 3 s). T0 drops every cycle. */
 const TIERS = [
   { id: 'T0', label: 'Base', gate: 'Nothing — start of game', rate: null },
-  { id: 'T1', label: 'Tier 1', gate: 'Own that profession\u2019s L1 suit', rate: 40 },
+  { id: 'T1', label: 'Tier 1', gate: 'Own that profession\u2019s L1 suit', rate: 25 },
   { id: 'T2', label: 'Tier 2', gate: 'Own that profession\u2019s L2 suit', rate: 120 },
   { id: 'T3', label: 'Tier 3', gate: 'Own that profession\u2019s L3 suit', rate: 300 },
   { id: 'T4', label: 'Tier 4', gate: 'Own that profession\u2019s L4 suit', rate: 800 }
@@ -90,7 +90,7 @@ for (const c of COMBOS) {
 }
 // Loyalty treat: Beast Pelts earned in Antrom (Wild Lands bears and bounties) are credited here too.
 MATERIALS.hide.note = 'Played Antrom? Any Beast Pelts you earned in the Wild Lands are given to you here as well. You keep them in Antrom too.';
-MATERIALS.coin = { id: 'coin', name: 'Coins', kind: 'currency', tier: 'T0', gate: 'Sell base materials from your Bank. Wood and Rock sell for 2, Meat and Bone for 3, and the refined versions for 30 to 40 each, so refine before you sell.', img: 'img/coin.png', sellable: false };
+MATERIALS.coin = { id: 'coin', name: 'Coins', kind: 'currency', tier: 'T0', gate: 'Sell base materials from your Bank. Wood and Rock sell for 4, Meat and Bone for 6, and the refined versions for 60 to 80 each, so refine before you sell. Storms pay coins too.', img: 'img/coin.png', sellable: false };
 
 /* Existing suit wearables (Polygon collections). Thumbnails come from the catalyst. */
 const SUIT_COLLECTION = 'urn:decentraland:matic:collections-v2:0xf676c2e2768f415a10fa1703a5100141084f63b5';
@@ -119,7 +119,7 @@ function assassinBuyLine(usd, mana = 0) {
 }
 const thumb = (urn) => `https://peer.decentraland.org/lambdas/collections/contents/${urn}/thumbnail`;
 // Suits do not multiply yield. They are keys: wearing tier N unlocks the tier N+1 drop.
-const SUIT_BAG = [500, 500, 1000, 2000, 4000];
+const SUIT_BAG = [1500, 500, 1000, 2000, 4000];
 
 function ref(p, t) { return LADDER[p][t][2]; }
 
@@ -130,7 +130,7 @@ function suitRecipe(p, level) {
     // Skeleton Yard materials are spread across every tier so the Assassin pieces (bought) matter to all
     // three crafted professions. Coins scale steeply because refined materials sell for 30 each.
     case 1:
-      return { cost: [[ref(p, 0), 300], ...others.map((o) => [ref(o, 0), 100]), ['coin', 2000]], requires: [`${PROFESSIONS[p].name} Lv 10`], drives: 'Visit all four zones once' };
+      return { cost: [[ref(p, 0), 150], ...others.map((o) => [ref(o, 0), 50]), ['coin', 1000]], requires: [`${PROFESSIONS[p].name} Lv 10`], drives: 'Visit all four zones once' };
     case 2:
       return { cost: [[ref(p, 1), 80], [ref('assassin', 1), 30], [ref(p, 0), 600], ['coin', 20000]], requires: [`Own ${PROFESSIONS[p].name} L1`, `${PROFESSIONS[p].name} Lv 20`], drives: 'Commit to a zone' };
     case 3:
