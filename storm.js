@@ -73,7 +73,7 @@ const Storm = (() => {
       ['Ring the bell', `Any guild member opens the WAR tab and taps <strong>ENTER THE STORM</strong>. If none is gathering that opens one; everyone in the lobby hears the bell and has ${mins(RULES.gatherMs)} to join. One Storm at a time, server-wide.`],
       ['Teams are drawn', `At the bell the list is shuffled into <strong>Team Dusk</strong> and <strong>Team Dawn</strong>, up to ${RULES.sideMax} a side. Alone? You fight a Wraith copy of yourself. Odd count? One Wraith pads the short side.`],
       ['Click a building', 'The building is the button. Walk, arrive, hold. Click another to move, or BACK TO CAMP to heal. Your fighter is you: HP and ATK come from your Assassin level, dagger, suit pieces, VIP tier and hero.'],
-      ['Most flags wins', `When the ${RULES.ticks} ticks run out the higher score takes it. Everyone earns Valor: ${RULES.valorPerTick} a tick in the Storm, ×${RULES.valorWinMult} on the winning side, +${RULES.valorPerKo} a knockout. Ranked Storms also pay into the bank: the winning side 100 wood, 100 rock, 50 meat and 50 bone each, the other side half.`],
+      ['Most flags wins', `When the ${RULES.ticks} ticks run out the higher score takes it. Everyone earns Valor: ${RULES.valorPerTick} a tick in the Storm, ×${RULES.valorWinMult} on the winning side, +${RULES.valorPerKo} a knockout. Ranked Storms also pay into the bank: the winning side 400 wood, 400 rock, 200 meat and 200 bone each, the other side half.`],
       ['Fight all day', `Your first ${RULES.raidsPerDay} Storms each day are ranked and pay Valor. After that you can keep fighting for the record (wins, Storms, knockouts) but the Valor is spent.`]
     ];
     $('#storm-steps').replaceChildren(...steps.map(([h, p], i) => {
