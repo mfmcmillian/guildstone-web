@@ -223,7 +223,7 @@ function openMaterial(id) {
 }
 
 /* ---------- Landing: zone cards ---------- */
-const ZONE_ART = { lumberjack: 'img/zone_lumber_v2.jpg', miner: 'img/zone_quarry_v2.jpg', butcher: 'img/zone_hunt_v2.jpg', assassin: 'img/zone_bones_v2.jpg' };
+const ZONE_ART = { lumberjack: 'img/zone_lumber_v3.jpg', miner: 'img/zone_quarry_v3.jpg', butcher: 'img/zone_hunt_v2.jpg', assassin: 'img/zone_bones_v2.jpg' };
 function renderZones() {
   const grid = $('#zone-grid');
   grid.replaceChildren(...PROF_IDS.map((p) => {
