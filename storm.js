@@ -7,13 +7,29 @@ const Storm = (() => {
   const ART = 'img/raid/';
   // Server defaults. The dashboard can retune them live; the text here is the design, not a contract.
   const RULES = { tickMs: 3000, ticks: 80, gatherMs: 120000, walkMs: 7500, koWalkMs: 20000, sideMax: 4, raidsPerDay: 5, captureTicks: 2, valorPerTick: 1, valorPerKo: 5, valorWinMult: 1.5 };
+  const STORM_REWARD = { win: { wood: 500, rock: 500, meat: 250, bone: 250, coins: 500 }, lose: { wood: 250, rock: 250, meat: 125, bone: 125, coins: 250 } };
+  // Guild War (battle.war in the server config): the Storm field stretched over a day.
+  const WAR = {
+    koMin: 5, pointsPerPip: 10, holdCap: 3, maxCapturers: 5, capturePower: 1.6,
+    captureMin: { watchtower: 90, sawmill: 90, citadel: 120, quarry: 60, shrine: 60, camp1: 60, camp2: 60 },
+    unlockMin: { camp1: 0, camp2: 60, watchtower: 120, shrine: 180, sawmill: 240, quarry: 300, citadel: 360 },
+    reward: { join: { wood: 1500, rock: 1500, meat: 750, bone: 750 }, win: { wood: 3000, rock: 3000, meat: 1500, bone: 1500 } }
+  };
+  // Labels sit just above each building on battlefield_v1.jpg. bonus: the holder's perk while standing inside.
   const POINTS = [
-    { id: 'watchtower', name: 'Watchtower', pips: 1, armour: 0, attack: 15, x: 34, y: 21 },
-    { id: 'sawmill', name: 'Sawmill', pips: 1, armour: 15, attack: 0, x: 68, y: 19 },
-    { id: 'citadel', name: 'Citadel', pips: 2, armour: 0, attack: 0, x: 51, y: 44 },
-    { id: 'quarry', name: 'Quarry', pips: 1, armour: 15, attack: 0, x: 30, y: 74 },
-    { id: 'shrine', name: 'Bone Shrine', pips: 1, armour: 0, attack: 15, x: 70, y: 71 }
+    { id: 'watchtower', name: 'Watchtower', pips: 1, bonus: 'atk', x: 26, y: 11 },
+    { id: 'sawmill', name: 'Sawmill', pips: 1, bonus: 'arm', x: 72, y: 9 },
+    { id: 'citadel', name: 'Citadel', pips: 2, bonus: null, x: 48, y: 29 },
+    { id: 'quarry', name: 'Quarry', pips: 1, bonus: 'arm', x: 26, y: 61 },
+    { id: 'shrine', name: 'Bone Shrine', pips: 1, bonus: 'atk', x: 72, y: 64 }
   ];
+  const CAMPS = [
+    { id: 'camp1', name: 'West Camp', x: 9, y: 29 },
+    { id: 'camp2', name: 'East Camp', x: 91, y: 29 }
+  ];
+  const BONUS = { atk: ['⚔', '+15% attack for the holder'], arm: ['🛡', '15% armour for the holder'] };
+  const NAME = Object.fromEntries([...POINTS, ...CAMPS].map((p) => [p.id, p.name]));
+  const rewardText = (r) => [['wood', 'Wood'], ['rock', 'Rock'], ['meat', 'Meat'], ['bone', 'Bone'], ['coins', 'Coins']].filter(([k]) => r[k] > 0).map(([k, n]) => `${fmt(r[k])} ${n}`).join(', ');
   const HERO_IDS = ['assassin', 'knight', 'warlock'];
   const HEROES = {
     assassin: { name: 'Assassin', beats: 'warlock', color: '#a259ff', blurb: 'The fighter you already level in the Skeleton Yard. Quick and lethal, cut down by the Knight’s shield.' },
@@ -48,12 +64,14 @@ const Storm = (() => {
 
   function renderField() {
     const field = $('#field');
+    // In-game marker style: NAME +pips [bonus], and a held-by pill underneath.
+    const label = (p, war = false) => el('span', { class: `pt${p.pips > 1 ? ' big' : ''}${war ? ' war' : ''}`, style: `left:${p.x}%;top:${p.y}%` },
+      el('b', null, p.name, el('i', null, `+${p.pips}`), p.bonus ? el('em', { title: BONUS[p.bonus][1] }, `${BONUS[p.bonus][0]} 15%`) : null),
+      el('small', null, war ? 'flag on War day' : p.pips > 1 ? 'worth double' : BONUS[p.bonus][1].replace(' for the holder', '')));
     field.replaceChildren(
       el('img', { src: `${ART}battlefield_v1.jpg`, alt: 'The Antrom Storm battlefield: five buildings between two camps' }),
-      el('span', { class: 'camp dusk', style: 'left:8%;top:52%' }, 'Team Dusk'),
-      el('span', { class: 'camp dawn', style: 'left:92%;top:52%' }, 'Team Dawn'),
-      ...POINTS.map((p) => el('span', { class: `pt${p.pips > 1 ? ' big' : ''}`, style: `left:${p.x}%;top:${p.y}%` },
-        el('b', null, p.name), el('small', null, `+${p.pips}${p.armour ? ` · ${p.armour}% armour` : p.attack ? ` · ${p.attack}% attack` : ''}`)))
+      ...POINTS.map((p) => label(p)),
+      ...CAMPS.map((c) => label({ ...c, pips: 1, bonus: null }, true))
     );
     const maxTick = POINTS.reduce((a, p) => a + p.pips, 0);
     $('#field-rules').replaceChildren(
@@ -63,31 +81,50 @@ const Storm = (() => {
         el('dt', null, 'Holding one'), el('dd', null, `A flag pays its pips every tick whether anyone is home or not, so a pair can own three or four buildings. Up to ${maxTick} a tick, ${maxTick * RULES.ticks} for a perfect Storm.`),
         el('dt', null, 'Building bonus'), el('dd', null, 'The side whose flag is on the building fights better inside it: Sawmill and Quarry cut the damage you take by 15%, Watchtower and Bone Shrine raise the damage you deal by 15%. Attackers get nothing. The Citadel has no bonus; it is worth double instead.'),
         el('dt', null, 'Knocked out'), el('dd', null, `HP at 0 and you are carried back to camp over ${secs(RULES.koWalkMs)}, revive at full and walk straight back to your last building. Walking home instead heals you 25% of max HP a tick, empty to full in four ticks, so retreating to heal is cheaper than dying.`),
-        el('dt', null, 'Walking'), el('dd', null, `Camp to Citadel is ${secs(RULES.walkMs)}; near corners about 3 s, far ones 12–15 s. You can't be hit on the road and you score nothing there.`)
+        el('dt', null, 'Walking'), el('dd', null, `Camp to Citadel is ${secs(RULES.walkMs)}; near corners about 3 s, far ones 12–15 s. You can't be hit on the road and you score nothing there.`),
+        el('dt', null, 'On War day'), el('dd', null, 'Same map, longer clock: the two camps become flags, buildings unlock one an hour, everyone spawns mid-field and a knockout sits out five minutes. Details under Guild War.')
       )
     );
   }
 
   function renderSteps() {
-    const steps = [
-      ['Ring the bell', `Any guild member opens the WAR tab and taps <strong>ENTER THE STORM</strong>. If none is gathering that opens one; everyone in the lobby hears the bell and has ${mins(RULES.gatherMs)} to join. One Storm at a time, server-wide.`],
-      ['Teams are drawn', `At the bell the list is shuffled into <strong>Team Dusk</strong> and <strong>Team Dawn</strong>, up to ${RULES.sideMax} a side. Alone? You fight a Wraith copy of yourself. Odd count? One Wraith pads the short side.`],
-      ['Click a building', 'The building is the button. Walk, arrive, hold. Click another to move, or BACK TO CAMP to heal. Your fighter is you: HP and ATK come from your Assassin level, dagger, suit pieces, VIP tier and hero.'],
-      ['Most flags wins', `When the ${RULES.ticks} ticks run out the higher score takes it. Everyone earns Valor: ${RULES.valorPerTick} a tick in the Storm, ×${RULES.valorWinMult} on the winning side, +${RULES.valorPerKo} a knockout. Ranked Storms also pay into the bank: the winning side 500 wood, 500 rock, 250 meat and 250 bone each, the other side half.`],
-      ['Fight all day', `Your first ${RULES.raidsPerDay} Storms each day are ranked and pay Valor. After that you can keep fighting for the record (wins, Storms, knockouts) but the Valor is spent.`]
-    ];
-    $('#storm-steps').replaceChildren(...steps.map(([h, p], i) => {
+    const cards = (root, list) => $(root).replaceChildren(...list.map(([h, p], i) => {
       const a = el('article', { class: 'rule' }, el('span', { class: 'step' }, i + 1), el('h3', null, h));
       const body = el('p'); body.innerHTML = p; a.append(body);
       return a;
     }));
-    const war = [
-      ['Sign up by Tuesday', 'The guild leader taps SIGN UP on the Guild Battle card any time from the previous Wednesday night until Tuesday 11:59 PM ET. WITHDRAW until then.'],
-      ['Get paired', 'Once sign-ups close, guilds are paired in sign-up order. The card shows your matchup for the week; an odd guild out sits that one with a bye.'],
-      ['Field four', 'Wednesday 9–11 PM ET, members tap JOIN like any Storm. The moment both guilds have four, the start pulls in to one minute. A side that can\u2019t field four by 11 PM forfeits and nothing is paid.'],
-      ['Take the payout', 'Everyone who fights banks 1,500 wood, 1,500 rock, 750 meat and 750 bone; the top guild’s fighters bank 3,000 wood, 3,000 rock, 1,500 meat and 1,500 bone on top. Bring friends: a tile with five fighters captures in a fraction of the time one takes. Guild points are Valor ×3 and the match goes on the guild\u2019s record. No Wraiths, no daily cap, always ranked.']
-    ];
-    $('#war-steps').replaceChildren(...war.map(([h, p], i) => el('article', { class: 'rule' }, el('span', { class: 'step' }, i + 1), el('h3', null, h), el('p', null, p))));
+    cards('#storm-steps', [
+      ['Ring the bell', `Any guild member opens the WAR tab and taps <strong>ENTER THE STORM</strong>. If none is gathering that opens one; everyone in the lobby hears the bell and has ${mins(RULES.gatherMs)} to join, or whoever rang it taps START NOW. One Storm at a time, server-wide.`],
+      ['Teams are drawn', `At the bell the list is shuffled into <strong>Team Dusk</strong> and <strong>Team Dawn</strong>, up to ${RULES.sideMax} a side. Alone? You fight a Wraith copy of yourself. Odd count? One Wraith pads the short side.`],
+      ['Click a building', 'The building is the button. Walk, arrive, hold. Click another to move, or your camp to heal. Your fighter is you: HP and ATK come from your Assassin level, dagger, suit pieces, VIP tier and hero.'],
+      ['Most flags wins', `When the ${RULES.ticks} ticks run out the higher score takes it, and the result screen names an MVP. Everyone earns Valor: ${RULES.valorPerTick} a tick in the Storm, ×${RULES.valorWinMult} on the winning side, +${RULES.valorPerKo} a knockout.`],
+      ['Bank the payout', `A ranked Storm pays into your Bank: <strong>${rewardText(STORM_REWARD.win)}</strong> on the winning side, ${rewardText(STORM_REWARD.lose)} on the other and on a draw. Leaving mid-match is a concession: a loss on the record and nothing banked.`],
+      ['Fight all day', `Your first ${RULES.raidsPerDay} Storms each day are ranked and pay Valor and loot. After that you can keep fighting for the record (wins, Storms, knockouts) but the payout is spent.`]
+    ]);
+
+    // Guild War: the unlock clock down the side, the rules as cards.
+    const unlocks = Object.entries(WAR.unlockMin).sort((a, b) => a[1] - b[1]);
+    $('#war-clock').replaceChildren(
+      el('h4', null, 'The day'),
+      el('ol', { class: 'clock' }, ...unlocks.map(([id, min]) => el('li', { class: id.startsWith('camp') ? 'camp' : id === 'citadel' ? 'big' : null },
+        el('b', null, min === 0 ? '0:00' : `${min / 60}:00`),
+        el('span', null, NAME[id], el('small', null, min === 0 ? 'open from the start' : `opens at hour ${min / 60}`))
+      ))),
+      el('p', { class: 'muted small' }, 'Hours after midnight ET. Nothing new after hour six; from then on it is seven flags until midnight.')
+    );
+    const speed = (n) => { const x = Math.pow(n, WAR.capturePower); return x >= 10 ? Math.round(x) : x.toFixed(1).replace('.0', ''); };
+    cards('#war-steps', [
+      ['One field, all day', 'Every guild that signed up fights on the one map, Thursday from midnight to midnight ET. Drop in, drop out, go gather: your fighter keeps standing where you left them, and closing the window doesn\u2019t leave the war.'],
+      ['Sign up by Tuesday', 'The guild leader taps SIGN UP on the Guild War card any time before the end of Tuesday (ET); WITHDRAW until then. The card lists every guild that is in, and Wednesday is for planning.'],
+      ['You start at the spawn', `Everyone spawns at a neutral spot mid-field. Nothing moves until you tap a building. Knocked out? ${WAR.koMin} minutes on the bench, then you stand up at the spawn at full health and pick again.`],
+      ['The camps are flags', `Hold a camp and it pays like a building. West Camp is open from the first minute, East Camp opens at hour ${WAR.unlockMin.camp2 / 60}. No armour, no healing, just points.`],
+      ['Flags open one an hour', `Watchtower at hour ${WAR.unlockMin.watchtower / 60}, then Bone Shrine, Sawmill, Quarry, and the Citadel at hour ${WAR.unlockMin.citadel / 60}. A locked flag says so when you hover it, and you can\u2019t walk to it.`],
+      ['Taking a flag', `Stand on a flag you do not hold and it starts to fall. A flag needs fighter-minutes (${WAR.captureMin.quarry} for Quarry, Shrine and the camps, ${WAR.captureMin.watchtower} for Watchtower and Sawmill, ${WAR.captureMin.citadel} for the Citadel) and headcount compounds: two of you take it <strong>${speed(2)}×</strong> faster than one, five of you <strong>${speed(5)}×</strong>. The holder has to stand on it to stop you.`],
+      ['Swords out', 'Two guilds on one flag and the fight is on, a clash every three seconds like a Storm. Headcount wins fights. Sawmill and Quarry give their holder 15% armour; Watchtower and Shrine +15% attack.'],
+      ['The race', `Every flag you hold pays all the time: <strong>${WAR.pointsPerPip} points a pip a minute</strong>, so the Citadel is worth ${WAR.pointsPerPip * 2}. The standings in the corner are the whole war, and the lobby chat calls every capture.`],
+      ['Do not get greedy', `Over ${WAR.holdCap} flags, taking and keeping more goes at half pace. Spread the guild out and guard what you have.`],
+      ['The payout', `Everyone who fights banks <strong>${rewardText(WAR.reward.join)}</strong>. The top guild\u2019s fighters bank <strong>${rewardText(WAR.reward.win)}</strong> on top, plus bragging rights until next Thursday. No Wraiths, no daily cap, always ranked.`]
+    ]);
   }
 
   function renderHeroes() {
