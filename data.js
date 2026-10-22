@@ -178,14 +178,14 @@ for (const p of PROF_IDS) {
   const relic = RELICS[p];
   WEARABLES.push({
     id: relic.id, name: relic.name, group: 'relic', profession: p, rarity: 'Mythic', collection: 'Antrom Relics (planned)', slot: relic.slot, planned: true,
-    img: `img/item_${relic.id}.jpg`, effect: `A ${relic.slot.toLowerCase()} piece you wear on top of your suit. It does not change your drops. It shows everyone you finished the ${PROFESSIONS[p].name} road.`,
+    img: `img/item_${relic.id}_v2.jpg`, effect: `A ${relic.slot.toLowerCase()} piece you wear on top of your suit. It does not change your drops. It shows everyone you finished the ${PROFESSIONS[p].name} road.`,
     cost: [[ref(p, 4), 40], ['antrom_essence', 80], [COMBO_L3[p], 40], ['coin', 400000]],
     requires: [`Own ${PROFESSIONS[p].name} L4`, `${PROFESSIONS[p].name} Lv 50`], drives: 'Keep gathering after L4'
   });
 }
 WEARABLES.push({
   id: 'guildstone_crown', name: 'Guildstone Crown', group: 'crown', rarity: 'Unique', collection: 'Antrom Relics (planned)', slot: 'Head', planned: true,
-  img: 'img/item_guildstone_crown.jpg', effect: 'The last thing in the game to craft. Only one will ever exist, and the leaderboard shows who has it.',
+  img: 'img/item_guildstone_crown_v2.jpg', effect: 'The last thing in the game to craft. Only one will ever exist, and the leaderboard shows who has it.',
   cost: [['guildstone_shard', 50], ['antrom_essence', 150], ['coin', 1000000]], relics: true,
   requires: ['Own all four Relics', 'All four professions at L4'], drives: 'The last thing anyone crafts'
 });

@@ -60,8 +60,8 @@ main { max-width: 1280px; margin: 0 auto; padding: 28px 28px 80px; }
   margin-bottom: 8px; overflow: hidden; isolation: isolate;
 }
 body[data-tab='wearables'] .hero { display: flex; }
-/* Mirrored so the knight stands on the right, clear of the logo and buttons. */
-.hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 0% 35%; z-index: -1; transform: scale(-1.02, 1.02); }
+/* The knight stands on the right of the key art; keep that side when the crop bites. */
+.hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 100% 30%; z-index: -1; transform: scale(1.02); }
 .hero::after {
   content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background:
