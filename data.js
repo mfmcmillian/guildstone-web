@@ -150,7 +150,7 @@ const RELICS = {
 const WEARABLES = [];
 WEARABLES.push({
   id: 'guildstone_ring', name: 'Antrom Guildstone Ring', group: 'ring', rarity: 'Epic', collection: 'Knights of Antrom · Hands',
-  img: 'img/item_guildstone_ring.jpg', effect: 'Smart wearable: gather anywhere in Decentraland, and run your Bank, Workshop, guild and professions from the HUD in any scene.',
+  img: 'img/item_guildstone_ring_v2.jpg', effect: 'Smart wearable: gather anywhere in Decentraland, and run your Bank, Workshop, guild and professions from the HUD in any scene.',
   cost: [], requires: ['Epic smart wearable by Knights of Antrom', 'Launch details announced in the Antrom community'], drives: 'The launcher. Everything below is earned while wearing it.'
 });
 for (const p of PROF_IDS) {
